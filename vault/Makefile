@@ -25,15 +25,16 @@ unseal:
 	fi
 	kubectl exec -it vault-0 -- vault operator unseal $$(jq -r '.unseal_keys_b64[]' $(KEYFILE))
 
+roottoken:
+	@jq -r '.root_token' $(KEYFILE)
+
 vdown:
 	helm uninstall vault
 
-.PHONY: devinit devup devstart devdown
+.PHONY: devinit devup devdown
 
 devinit: vinit
 
 devup: pgup vup
-
-devstart: unseal
 
 devdown: vdown pgdown
