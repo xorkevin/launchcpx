@@ -1,0 +1,11 @@
+image:
+  repository: 'postgres'
+  tag: '12-alpine'
+
+postgresqlDataDir: '/var/lib/postgresql/data/pgdata'
+
+postgresqlUsername: 'postgres'
+postgresqlDatabase: 'vault'
+
+persistence:
+  mountPath: '/var/lib/postgresql/data'

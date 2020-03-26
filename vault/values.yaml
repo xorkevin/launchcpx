@@ -24,4 +24,4 @@ server:
 
 ui:
   enabled: true
-  serviceType: LoadBalancer
+  serviceType: 'LoadBalancer'
