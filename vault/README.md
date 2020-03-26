@@ -12,3 +12,4 @@
 - `helm status vault`
 - `helm upgrade -f values.yaml vault ./helmchart`
 - `helm uninstall vault`
+- `helm uninstall vaultpg`
