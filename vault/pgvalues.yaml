@@ -5,6 +5,7 @@ image:
 postgresqlDataDir: '/data/pgdata'
 
 persistence:
+  enabled: true
   mountPath: '/data'
 
 postgresqlUsername: 'vault'
