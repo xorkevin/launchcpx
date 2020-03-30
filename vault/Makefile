@@ -9,6 +9,9 @@ VAULT=VAULT_ADDR=http://127.0.0.1:8200/ vault
 
 .PHONY: pgup pgdown
 
+pginit:
+	kubectl create secret generic vaultpg-pass --from-file=postgresql-password=vaultpg-pass.txt
+
 pgup:
 	helm install -f pgvalues.yaml vaultpg bitnami/postgresql
 
@@ -28,7 +31,7 @@ vdown:
 
 .PHONY: devinit devup devdown devforward devclean
 
-devinit: vinit
+devinit: pginit vinit
 
 devup: pgup vup
 

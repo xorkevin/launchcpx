@@ -8,12 +8,9 @@ persistence:
   enabled: true
   mountPath: '/data'
 
-volumePermissions:
-  enabled: true
-
 postgresqlUsername: 'vault'
-postgresqlPassword: 'admin'
 postgresqlDatabase: 'vault'
+existingSecret: 'vaultpg-pass'
 
 initdbScripts:
   db_init_script.sql: |
