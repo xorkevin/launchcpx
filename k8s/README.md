@@ -2,6 +2,13 @@
 
 ## Dev
 
+### KVM
+
+- `pacman -S qemu libvirt ebtables openbsd-netcat dnsmasq`
+- `systemctl enable libvirtd.socket`
+- `virsh -c qemu:///system`
+- `virsh -c qemu:///session`
+
 ### Minikube
 
 - `pacman -S minikube`
