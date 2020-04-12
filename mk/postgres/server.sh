@@ -5,8 +5,7 @@ set -e
 . ./mk/source.sh
 
 dbname=${1:-testdb}
-username=${2:-vault}
-configdir=${3}
+configdir=${2}
 
 password=$(base64 < /dev/urandom | tr +/ -_ | head -c ${PASS_LEN})
 secret=${dbname}-postgresql-pass
@@ -14,7 +13,7 @@ secret=${dbname}-postgresql-pass
 kubectl create secret generic ${secret} --from-literal=postgresql-password="${password}"
 
 config=${dbname}-postgresql-init
-values="postgresqlUsername=${username},postgresqlDatabase=${dbname},existingSecret=${secret}"
+values="postgresqlUsername=postgres,postgresqlDatabase=${dbname},existingSecret=${secret}"
 
 if [ ! -z $configdir ]; then
   kubectl create configmap ${config} --from-file=${configdir};
