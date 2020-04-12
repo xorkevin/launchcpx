@@ -1,0 +1,9 @@
+image:
+  repository: 'bitnami/postgresql'
+  tag: '12'
+
+postgresqlDataDir: '/data/pgdata'
+
+persistence:
+  enabled: true
+  mountPath: '/data'
