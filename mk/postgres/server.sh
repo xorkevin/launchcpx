@@ -20,11 +20,11 @@ if [ -z $(check_secret $ns $secret) ]; then
     1>&2;
 fi
 
-<<EOF
+cat <<EOF
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
-namespace: ${ns}
-namePrefix: ${dbname}-
+namespace: '${ns}'
+namePrefix: '${dbname}-'
 commonLabels:
   app.kubernetes.io/name: 'postgres'
   app.kubernetes.io/instance: 'postgres'
@@ -35,10 +35,15 @@ bases:
 EOF
 
 if [ ! -z $configdir ]; then
-<<EOF
+  files=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
+  if [ ! -z $files ]; then
+    cat <<EOF
 configMapGenerator:
-- name: my-application-properties
-  files:
-  - application.properties
+  - name: 'postgres-initscripts'
+    files:
 EOF
+    for file in $files; do
+      echo "      - '${file}'"
+    done
+  fi
 fi
