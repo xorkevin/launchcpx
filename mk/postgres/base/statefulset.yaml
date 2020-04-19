@@ -1,0 +1,54 @@
+apiVersion: 'apps/v1'
+kind: 'StatefulSet'
+metadata:
+  name: 'postgres'
+spec:
+  selector:
+    matchLabels:
+      component: 'postgres-server'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: 'postgres-server'
+    spec:
+      containers:
+        - image: 'postgres:12-alpine'
+          name: 'postgres'
+          env:
+            - name: 'POSTGRES_PASSWORD'
+              valueFrom:
+                secretKeyRef:
+                  name: 'postgres-pass'
+                  key: 'password'
+            - name: 'POSTGRES_USER'
+              value: 'postgres'
+            - name: 'POSTGRES_DB'
+              value: 'postgres'
+            - name: 'PGDATA'
+              value: '/var/lib/postgresql/data'
+          ports:
+            - containerPort: 5432
+              name: 'postgres'
+          volumeMounts:
+            - name: 'data'
+              mountPath: '/var/lib/postgresql'
+            - name: 'initscripts'
+              mountPath: '/docker-entrypoint-initdb.d'
+      volumes:
+        - name: 'postgres-data'
+          persistentVolumeClaim:
+            claimName: 'data'
+        - name: 'initscripts'
+          configMap:
+            name: 'postgres-initscripts'
+            optional: true
+  volumeClaimTemplates:
+    - metadata:
+        name: 'data'
+      spec:
+        accessModes:
+          - 'ReadWriteOnce'
+        resources:
+          requests:
+            storage: '1Gi'

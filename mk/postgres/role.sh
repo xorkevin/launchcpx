@@ -8,8 +8,8 @@ dbname=${1:-testdb}
 ttl=${2:-1h}
 maxttl=${3:-24h}
 
-secret=${dbname}-postgresql-pass
-password=$(kubectl get secrets/${secret} -o json | jq -r '.data["postgresql-password"]' | base64 -d)
+secret=${dbname}-postgres-pass
+password=$(kubectl get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
 
 role=${dbname}-role
 

@@ -5,19 +5,14 @@ set -e
 . ./mk/source.sh
 
 dbname=${1:-testdb}
-configdir=${2}
+namespace=${2:-default}
+configdir=${3}
 
 password=$(base64 < /dev/urandom | tr +/ -_ | head -c ${PASS_LEN})
-secret=${dbname}-postgresql-pass
+secret=${dbname}-postgres-pass
 
-kubectl create secret generic ${secret} --from-literal=postgresql-password="${password}"
-
-config=${dbname}-postgresql-init
-values="postgresqlUsername=postgres,postgresqlDatabase=${dbname},existingSecret=${secret}"
+kubectl create secret generic ${secret} --from-literal=password="${password}"
 
 if [ ! -z $configdir ]; then
-  kubectl create configmap ${config} --from-file=${configdir};
-  values="${values},initdbScriptsConfigMap=${config}"
+  echo "has config"
 fi
-
-helm install -f mk/postgres/values.yaml --set ${values} ${dbname} bitnami/postgresql
