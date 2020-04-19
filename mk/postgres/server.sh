@@ -8,16 +8,14 @@ set -e
 ns=${1:-${NAMESPACE}}
 dbname=${2:-testdb}
 configdir=${3}
+passfile=${4:-dbpass}
 
 create_ns_ifne $ns
 
-# create secret ifne
-secret=${dbname}-postgres-pass
-if [ -z $(check_secret $ns $secret) ]; then
-  password=$(gen_pass ${PASS_LEN})
-  kubectl -n $ns create secret generic ${secret} \
-    --from-literal=password="${password}" \
-    1>&2;
+# create password file ifne
+secret=postgres-pass
+if [ ! -e $passfile ]; then
+  gen_pass ${PASS_LEN} > $passfile
 fi
 
 cat <<EOF
@@ -32,6 +30,11 @@ commonLabels:
   app.kubernetes.io/managed-by: 'launchcpx'
 bases:
   - 'github.com/xorkevin/launchcpx/mk/postgres/base'
+secretGenerator:
+  - name: postgres-pass
+    files:
+      - password=${passfile}
+    type: Opaque
 EOF
 
 if [ ! -z $configdir ]; then
