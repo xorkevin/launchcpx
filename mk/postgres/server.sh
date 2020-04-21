@@ -1,35 +1,94 @@
-#!/usr/bin/env bash
-
 set -e
 
 . ./mk/source.sh
 . ./mk/lib.sh
 
-ns=${1:-${NAMESPACE}}
-dbname=${2:-testdb}
-configdir=${3}
-passfile=${4:-dbpass}
+launchplan_postgres_usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $0 [OPTIONS] <name>
 
-create_ns_ifne $ns
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+    -c <init script dir>
+        Add init script directory containing *.sql and *.sh files.
+    -p <passfile>
+        Output password to passfile.
+        Default is dbpass.
+    -l <length>
+        Change the generated password length in terms of bytes of randomness.
+        Default is 32.
+    -o <file>
+        Output config to file.
+        Default is stdout.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name prefixes all resources of the postgres deployment.
+EOF
+}
+
+launchplan_postgres_exit() {
+  launchplan_postgres_usage
+  exit 2
+}
+
+ns=
+configdir=
+passfile=dbpass
+passlen=32
+outfile=/dev/stdout
+name=
+
+while getopts ':n:c:p:l:o:h' opt; do
+ case $opt in
+   n) ns="$OPTARG";;
+   c) configdir="$OPTARG";;
+   p) passfile="$OPTARG";;
+   l) passlen=$OPTARG;;
+   o) outfile="$OPTARG";;
+   h) launchplan_postgres_usage; exit 0;;
+   *) launchplan_postgres_exit;;
+ esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+
+# validation
+if [ -z $name ]; then
+  launchplan_postgres_exit
+fi
 
 # create password file ifne
 secret=postgres-pass
 if [ ! -e $passfile ]; then
-  gen_pass ${PASS_LEN} > $passfile
+  launchplan_gen_pass $passlen > $passfile
 fi
 
-cat <<EOF
+# generate output
+cat <<EOF > $outfile
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
+EOF
+
+if [ ! -z $ns ]; then
+  cat <<EOF >> $outfile
 namespace: '${ns}'
-namePrefix: '${dbname}-'
+EOF
+fi
+
+cat <<EOF >> $outfile
+namePrefix: '${name}-'
 commonLabels:
   app.kubernetes.io/name: 'postgres'
-  app.kubernetes.io/instance: 'postgres'
-  app.kubernetes.io/part-of: 'postgres'
+  app.kubernetes.io/instance: 'postgres-${name}'
+  app.kubernetes.io/part-of: 'postgres-${name}'
   app.kubernetes.io/managed-by: 'launchcpx'
 bases:
-  - 'github.com/xorkevin/launchcpx/mk/postgres/base'
+  - 'github.com/xorkevin/launchcpx//mk/postgres/base'
 secretGenerator:
   - name: postgres-pass
     files:
@@ -40,13 +99,13 @@ EOF
 if [ ! -z $configdir ]; then
   files=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
   if [ ! -z $files ]; then
-    cat <<EOF
+    cat <<EOF >> $outfile
 configMapGenerator:
   - name: 'postgres-initscripts'
     files:
 EOF
     for file in $files; do
-      echo "      - '${file}'"
+      echo "      - '${file}'" >> $outfile
     done
   fi
 fi
