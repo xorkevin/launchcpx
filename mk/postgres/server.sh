@@ -56,10 +56,19 @@ while getopts ':n:c:p:l:o:h' opt; do
 done
 shift $(($OPTIND - 1))
 name="$1"
+configfiles=
 
 # validation
 if [ -z $name ]; then
   launchplan_postgres_exit
+fi
+
+if [ ! -z $configdir ]; then
+  if [ ! -d $configdir ]; then
+    echo "$configdir is not a directory." 1>&2
+    exit 1
+  fi
+  configfiles=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
 fi
 
 # create password file ifne
@@ -96,16 +105,13 @@ secretGenerator:
     type: Opaque
 EOF
 
-if [ ! -z $configdir ]; then
-  files=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
-  if [ ! -z $files ]; then
-    cat <<EOF >> $outfile
+if [ ! -z $configfiles ]; then
+  cat <<EOF >> $outfile
 configMapGenerator:
   - name: 'postgres-initscripts'
     files:
 EOF
-    for file in $files; do
-      echo "      - '${file}'" >> $outfile
-    done
-  fi
+  for file in $configfiles; do
+    echo "      - '${file}'" >> $outfile
+  done
 fi
