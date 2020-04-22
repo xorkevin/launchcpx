@@ -3,7 +3,7 @@ set -e
 . ./mk/source.sh
 . ./mk/lib.sh
 
-launchplan_postgres_usage() {
+usage() {
   cat <<EOF 1>&2
 USAGE:
     $0 [OPTIONS] <name>
@@ -31,8 +31,8 @@ ARGS:
 EOF
 }
 
-launchplan_postgres_exit() {
-  launchplan_postgres_usage
+usage_exit() {
+  usage
   exit 2
 }
 
@@ -50,8 +50,8 @@ while getopts ':n:c:p:l:o:h' opt; do
    p) passfile="$OPTARG";;
    l) passlen=$OPTARG;;
    o) outfile="$OPTARG";;
-   h) launchplan_postgres_usage; exit 0;;
-   *) launchplan_postgres_exit;;
+   h) usage; exit 0;;
+   *) usage_exit;;
  esac
 done
 shift $(($OPTIND - 1))
@@ -60,7 +60,7 @@ configfiles=
 
 # validation
 if [ -z $name ]; then
-  launchplan_postgres_exit
+  usage_exit
 fi
 
 if [ ! -z $configdir ]; then
@@ -74,7 +74,7 @@ fi
 # create password file ifne
 secret=postgres-pass
 if [ ! -e $passfile ]; then
-  launchplan_gen_pass $passlen > $passfile
+  gen_pass $passlen > $passfile
 fi
 
 if [ -z $outfile ]; then
