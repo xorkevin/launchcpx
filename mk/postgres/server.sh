@@ -40,7 +40,7 @@ ns=
 configdir=
 passfile=dbpass
 passlen=32
-outfile=/dev/stdout
+outfile=
 name=
 
 while getopts ':n:c:p:l:o:h' opt; do
@@ -77,19 +77,26 @@ if [ ! -e $passfile ]; then
   launchplan_gen_pass $passlen > $passfile
 fi
 
+if [ -z $outfile ]; then
+  exec 3>&1
+else
+  exec 3>$outfile
+fi
+
 # generate output
-cat <<EOF > $outfile
+(
+cat <<EOF
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
 EOF
 
 if [ ! -z $ns ]; then
-  cat <<EOF >> $outfile
+  cat <<EOF
 namespace: '${ns}'
 EOF
 fi
 
-cat <<EOF >> $outfile
+cat <<EOF
 namePrefix: '${name}-'
 commonLabels:
   app.kubernetes.io/name: 'postgres'
@@ -106,12 +113,15 @@ secretGenerator:
 EOF
 
 if [ ! -z $configfiles ]; then
-  cat <<EOF >> $outfile
+  cat <<EOF
 configMapGenerator:
   - name: 'postgres-initscripts'
     files:
 EOF
   for file in $configfiles; do
-    echo "      - '${file}'" >> $outfile
+    echo "      - '${file}'"
   done
 fi
+) 1>&3
+
+exec 3>&-
