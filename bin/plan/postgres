@@ -2,12 +2,18 @@
 
 set -e
 
-. "${0%/*}/../lib.sh"
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+
+. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
 
 usage() {
   cat <<EOF 1>&2
 USAGE:
-    $BIN_NAME postgres [OPTIONS] <name>
+    $BIN_NAME [OPTIONS] <name>
 
 OPTIONS:
     -n <namespace>
@@ -73,7 +79,6 @@ if [ ! -z $configdir ]; then
 fi
 
 # create password file ifne
-secret=postgres-pass
 if [ ! -e $passfile ]; then
   gen_pass $passlen > $passfile
 fi

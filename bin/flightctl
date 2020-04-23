@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -e
+
+export FLIGHTCTL_ROOT=${0%/*}
+
+. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $0 <command> [<args>]
+
+COMMANDS:
+    plan
+        Generate a kustomization.yaml for application deployments.
+    help
+        Print this help
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+cmd=$1
+
+if [ ! -z $cmd ]; then
+  shift 1
+else
+  usage_exit
+fi
+
+export BIN_NAME="$0 $cmd"
+
+case $cmd in
+  'plan') "$FLIGHTCTL_ROOT/flightctl-plan" "$@";;
+  'help') usage; exit 0;;
+  *) usage_exit;;
+esac

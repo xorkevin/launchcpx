@@ -1,5 +1,3 @@
-export BIN_NAME='flightctl plan'
-
 gen_pass() {
   # passlen is bytes of randomness
   # base64 encode is 4/3 times longer
