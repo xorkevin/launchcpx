@@ -6,10 +6,12 @@ export FLIGHTCTL_ROOT=${0%/*}
 
 . "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
 
+SELF=flightctl
+
 usage() {
   cat <<EOF 1>&2
 USAGE:
-    $0 <command> [<args>]
+    $SELF <command> [<args>]
 
 COMMANDS:
     plan
@@ -32,7 +34,7 @@ else
   usage_exit
 fi
 
-export BIN_NAME="$0 $cmd"
+export BIN_NAME="$SELF $cmd"
 
 case $cmd in
   'plan') "$FLIGHTCTL_ROOT/flightctl-plan" "$@";;
