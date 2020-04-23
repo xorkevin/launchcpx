@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS test_table (
-  id VARCHAR(32),
-  PRIMARY KEY (id)
-);

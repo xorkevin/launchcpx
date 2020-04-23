@@ -6,6 +6,7 @@ spec:
   selector:
     matchLabels:
       component: 'postgres-server'
+  serviceName: 'postgres-internal'
   replicas: 1
   template:
     metadata:

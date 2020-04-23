@@ -2,26 +2,26 @@
 
 set -e
 
-. ./mk/source.sh
+export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
 
-dbname=${1:-testdb}
+name=${1:-testdb}
 ttl=${2:-1h}
 maxttl=${3:-24h}
 
-secret=${dbname}-postgres-pass
+secret=${name}-postgres-pass
 password=$(kubectl get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
 
-role=${dbname}-role
+role=${name}-role
 
-vault write database/config/${dbname} \
+vault write database/config/${name} \
   plugin_name="postgresql-database-plugin" \
   allowed_roles="${role}" \
-  connection_url="postgresql://{{username}}:{{password}}@${dbname}-postgresql.default.svc.cluster.local:5432/${dbname}?sslmode=disable" \
+  connection_url="postgresql://{{username}}:{{password}}@${name}-postgresql.default.svc.cluster.local:5432/${name}?sslmode=disable" \
   username="postgres" \
   password="${password}"
 
 vault write database/roles/${role} \
-  db_name="${dbname}" \
+  db_name="${name}" \
   creation_statements=@mk/postgres/rolecreate.sql \
   revocation_statements=@mk/postgres/rolerevoke.sql \
   default_ttl="${ttl}" \

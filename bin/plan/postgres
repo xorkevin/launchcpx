@@ -137,7 +137,8 @@ configMapGenerator:
     files:
 EOF
   for file in $configfiles; do
-    echo "      - '${file}'"
+    f=$(realpath --relative-to=$outdir $file)
+    echo "      - '${f}'"
   done
 fi
 ) 1>&3
