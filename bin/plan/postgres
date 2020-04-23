@@ -20,15 +20,14 @@ OPTIONS:
         Use the kubernetes namespace.
     -c <init script dir>
         Add init script directory containing *.sql and *.sh files.
-    -p <passfile>
-        Output password to passfile.
-        Default is dbpass.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
         Default is 32.
-    -o <file>
-        Output config to file.
-        Default is stdout.
+    -o <directory>
+        Output config to directory.
+        Default is the current directory.
+    -d
+        Dry run. Do not output files.
     -h
         Print this help.
 
@@ -45,18 +44,18 @@ usage_exit() {
 
 ns=
 configdir=
-passfile=dbpass
 passlen=32
-outfile=
+outdir=.
 name=
+dryrun=
 
-while getopts ':n:c:p:l:o:h' opt; do
+while getopts ':n:c:l:o:dh' opt; do
  case $opt in
    n) ns="$OPTARG";;
    c) configdir="$OPTARG";;
-   p) passfile="$OPTARG";;
    l) passlen=$OPTARG;;
-   o) outfile="$OPTARG";;
+   o) outdir="$OPTARG";;
+   d) dryrun="1";;
    h) usage; exit 0;;
    *) usage_exit;;
  esac
@@ -78,15 +77,28 @@ if [ ! -z $configdir ]; then
   configfiles=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
 fi
 
-# create password file ifne
-if [ ! -e $passfile ]; then
-  gen_pass $passlen > $passfile
+if [ ! -z $dryrun ]; then
+  echo "DRY RUN" 1>&2
 fi
 
-if [ -z $outfile ]; then
-  exec 3>&1
-else
+if [ -z $dryrun ]; then
+  mkdir -p $outdir
+fi
+
+passfile=dbpass
+if [ -z $dryrun ]; then
+  # create password file ifne
+  passpath="$outdir/$passfile"
+  if [ ! -e $passpath ]; then
+    gen_pass $passlen > $passpath
+  fi
+fi
+
+if [ -z $dryrun ]; then
+  outfile=$outdir/kustomization.yaml
   exec 3>$outfile
+else
+  exec 3>&1
 fi
 
 # generate output
