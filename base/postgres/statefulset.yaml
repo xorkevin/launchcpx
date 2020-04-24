@@ -37,9 +37,6 @@ spec:
             - name: 'initscripts'
               mountPath: '/docker-entrypoint-initdb.d'
       volumes:
-        - name: 'postgres-data'
-          persistentVolumeClaim:
-            claimName: 'data'
         - name: 'initscripts'
           configMap:
             name: 'postgres-initscripts'
