@@ -10,3 +10,4 @@ commonLabels:
 resources:
   - 'statefulset.yaml'
   - 'service.yaml'
+  - 'headlessservice.yaml'

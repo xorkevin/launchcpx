@@ -47,7 +47,7 @@ while getopts ':n:h' opt; do
 done
 shift $(($OPTIND - 1))
 name="$1"
-pgname="$1"
+pgname="$2"
 
 # validation
 if [ -z $name ]; then
@@ -59,4 +59,4 @@ fi
 
 export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
 
-usage
+echo $ns $name $pgname
