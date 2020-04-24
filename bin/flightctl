@@ -16,6 +16,8 @@ USAGE:
 COMMANDS:
     plan
         Generate a kustomization.yaml for application deployments.
+    register
+        Register applications with services.
     help
         Print this help
 EOF
@@ -38,6 +40,7 @@ export BIN_NAME="$SELF $cmd"
 
 case $cmd in
   'plan') "$FLIGHTCTL_ROOT/flightctl-plan" "$@";;
+  'register') "$FLIGHTCTL_ROOT/flightctl-register" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

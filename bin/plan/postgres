@@ -7,7 +7,6 @@ if [ -z $FLIGHTCTL_ROOT ]; then
   exit 1
 fi
 
-
 . "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
 
 usage() {
@@ -50,25 +49,25 @@ name=
 dryrun=
 
 while getopts ':n:c:l:o:dh' opt; do
- case $opt in
-   n) ns="$OPTARG";;
-   c) configdir="$OPTARG";;
-   l) passlen=$OPTARG;;
-   o) outdir="$OPTARG";;
-   d) dryrun="1";;
-   h) usage; exit 0;;
-   *) usage_exit;;
- esac
+  case $opt in
+    n) ns="$OPTARG";;
+    c) configdir="$OPTARG";;
+    l) passlen=$OPTARG;;
+    o) outdir="$OPTARG";;
+    d) dryrun="1";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
 done
 shift $(($OPTIND - 1))
 name="$1"
-configfiles=
 
 # validation
 if [ -z $name ]; then
   usage_exit
 fi
 
+configfiles=
 if [ ! -z $configdir ]; then
   if [ ! -d $configdir ]; then
     echo "$configdir is not a directory." 1>&2

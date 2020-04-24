@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+
+SELF=$BIN_NAME
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $SELF <app> [<args>]
+
+APPS:
+    postgres
+        Register postgres instance.
+    help
+        Print this help
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+cmd=$1
+
+if [ ! -z $cmd ]; then
+  shift 1
+else
+  usage_exit
+fi
+
+export BIN_NAME="$BIN_NAME $cmd"
+
+case $cmd in
+  'postgres') "$FLIGHTCTL_ROOT/register/postgres" "$@";;
+  'help') usage; exit 0;;
+  *) usage_exit;;
+esac

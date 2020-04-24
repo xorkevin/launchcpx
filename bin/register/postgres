@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $BIN_NAME [OPTIONS] <name>
+
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+        Default is default.
+    -t <ttl>
+        Time to live duration of vault access tokens.
+        Default is 1h.
+    -m <maxttl>
+        Max time to live duration of vault access tokens.
+        Default is 24h.
+    -f
+        Force reregister with vault even if already registered.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name of the postgres service.
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+ns=default
+ttl=1h
+maxttl=24h
+name=
+force=
+
+while getopts ':n:t:m:fh' opt; do
+  case $opt in
+    n) ns="$OPTARG";;
+    t) ttl="$OPTARG";;
+    m) maxttl="$OPTARG";;
+    f) force="1";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+
+# validation
+if [ -z $name ]; then
+  usage_exit
+fi
+
+export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
+
+svcname=$name-postgres
+
+secret=$(kubectl -n $ns get sts/$svcname -o=json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "POSTGRES_PASSWORD") | .valueFrom.secretKeyRef.name')
+password=$(kubectl -n $ns get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
+
+role=${name}-role
+
+if [ -z $force ] && (vault read database/config/${name} >/dev/null 2>&1); then
+  echo "Already registered $svcname with vault" 1>&2
+  exit 1
+fi
+
+vault write database/config/${name} \
+  plugin_name="postgresql-database-plugin" \
+  allowed_roles="${role}" \
+  connection_url="postgresql://{{username}}:{{password}}@${svcname}.${ns}.svc.cluster.local:5432/postgres?sslmode=disable" \
+  username="postgres" \
+  password="${password}"
+
+vault write database/roles/${role} \
+  db_name="${name}" \
+  creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolecreate.sql" \
+  revocation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerevoke.sql" \
+  default_ttl="${ttl}" \
+  max_ttl="${maxttl}"
