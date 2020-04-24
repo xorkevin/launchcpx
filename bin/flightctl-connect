@@ -18,7 +18,7 @@ USAGE:
 
 SERVICES:
     postgres
-        Register postgres instance.
+        Connect an application to a postgres instance.
     help
         Print this help
 EOF
@@ -40,7 +40,7 @@ fi
 export BIN_NAME="$BIN_NAME $cmd"
 
 case $cmd in
-  'postgres') "$FLIGHTCTL_ROOT/register/postgres" "$@";;
+  'postgres') "$FLIGHTCTL_ROOT/connect/postgres" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

@@ -14,9 +14,9 @@ SELF=$BIN_NAME
 usage() {
   cat <<EOF 1>&2
 USAGE:
-    $SELF <app> [<args>]
+    $SELF <service> [<args>]
 
-APPS:
+SERVICES:
     postgres
         Generate a postgres kustomization.yaml.
     help

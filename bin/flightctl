@@ -15,9 +15,11 @@ USAGE:
 
 COMMANDS:
     plan
-        Generate a kustomization.yaml for application deployments.
+        Generate a kustomization.yaml for a service.
     register
-        Register applications with services.
+        Register services with infrastructure.
+    connect
+        Connect applications with services.
     help
         Print this help
 EOF
@@ -41,6 +43,7 @@ export BIN_NAME="$SELF $cmd"
 case $cmd in
   'plan') "$FLIGHTCTL_ROOT/flightctl-plan" "$@";;
   'register') "$FLIGHTCTL_ROOT/flightctl-register" "$@";;
+  'connect') "$FLIGHTCTL_ROOT/flightctl-connect" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $BIN_NAME [OPTIONS] <name> <pgname>
+
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+        Default is default.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name of the application.
+    <pgname>
+        The name of the postgres service.
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+ns=default
+name=
+pgname=
+
+while getopts ':n:h' opt; do
+  case $opt in
+    n) ns="$OPTARG";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+pgname="$1"
+
+# validation
+if [ -z $name ]; then
+  usage_exit
+fi
+if [ -z $pgname ]; then
+  usage_exit
+fi
+
+export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
+
+usage
