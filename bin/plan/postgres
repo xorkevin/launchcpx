@@ -25,8 +25,6 @@ OPTIONS:
     -o <directory>
         Output config to directory.
         Default is the current directory.
-    -d
-        Dry run. Do not output files.
     -h
         Print this help.
 
@@ -46,15 +44,13 @@ configdir=
 passlen=32
 outdir=.
 name=
-dryrun=
 
-while getopts ':n:c:l:o:dh' opt; do
+while getopts ':n:c:l:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
     c) configdir="$OPTARG";;
     l) passlen=$OPTARG;;
     o) outdir="$OPTARG";;
-    d) dryrun="1";;
     h) usage; exit 0;;
     *) usage_exit;;
   esac
@@ -76,29 +72,17 @@ if [ ! -z $configdir ]; then
   configfiles=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
 fi
 
-if [ ! -z $dryrun ]; then
-  echo "DRY RUN" 1>&2
-fi
-
-if [ -z $dryrun ]; then
-  mkdir -p $outdir
-fi
+mkdir -p $outdir
 
 passfile=dbpass
-if [ -z $dryrun ]; then
-  # create password file ifne
-  passpath="$outdir/$passfile"
-  if [ ! -e $passpath ]; then
-    gen_pass $passlen > $passpath
-  fi
+# create password file ifne
+passpath="$outdir/$passfile"
+if [ ! -e $passpath ]; then
+  gen_pass $passlen > $passpath
 fi
 
-if [ -z $dryrun ]; then
-  outfile=$outdir/kustomization.yaml
-  exec 3>$outfile
-else
-  exec 3>&1
-fi
+outfile=$outdir/kustomization.yaml
+exec 3>$outfile
 
 # generate output
 (
