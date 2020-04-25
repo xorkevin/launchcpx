@@ -28,3 +28,19 @@ connect_write_app_policy() {
   policyfiles=$(find $policydir -type f -name '*.policy.hcl')
   cat $policyfiles | vault policy write ${appname} -
 }
+
+connect_write_kube_role() {
+  ns=$1
+  name=$2
+  ttl=$3
+  maxttl=$4
+
+  appname=${ns}-${name}
+  role=${appname}-role
+  vault write auth/kubernetes/role/${role} \
+    bound_service_account_names="$name" \
+    bound_service_account_namespaces="$ns" \
+    policies="$appname" \
+    ttl="$ttl" \
+    max_ttl="$maxttl"
+}

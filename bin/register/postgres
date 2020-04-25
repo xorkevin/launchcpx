@@ -42,9 +42,9 @@ usage_exit() {
   exit 2
 }
 
-ns=default
-ttl=1h
-maxttl=24h
+ns='default'
+ttl='1h'
+maxttl='24h'
 name=
 force=
 deregister=
