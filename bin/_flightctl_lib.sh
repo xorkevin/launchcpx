@@ -1,3 +1,5 @@
+export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
+
 gen_pass() {
   # passlen is bytes of randomness
   # base64 encode is 4/3 times longer
@@ -15,4 +17,14 @@ create_ns_ifne() {
   if [ -z $(check_ns $ns) ]; then
     kubectl create namespace $ns 1>&2
   fi
+}
+
+connect_write_app_policy() {
+  policydir=$1
+  ns=$2
+  name=$3
+
+  appname=${ns}-${name}
+  policyfiles=$(find $policydir -type f -name '*.policy.hcl')
+  cat $policyfiles | vault policy write ${appname} -
 }

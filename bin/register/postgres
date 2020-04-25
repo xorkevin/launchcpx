@@ -26,6 +26,8 @@ OPTIONS:
         Default is 24h.
     -f
         Force reregister with vault even if already registered.
+    -d
+        Deregister role.
     -h
         Print this help.
 
@@ -45,13 +47,15 @@ ttl=1h
 maxttl=24h
 name=
 force=
+deregister=
 
-while getopts ':n:t:m:fh' opt; do
+while getopts ':n:t:m:fdh' opt; do
   case $opt in
     n) ns="$OPTARG";;
     t) ttl="$OPTARG";;
     m) maxttl="$OPTARG";;
     f) force="1";;
+    d) deregister="1";;
     h) usage; exit 0;;
     *) usage_exit;;
   esac
@@ -64,21 +68,27 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
+svcname=${name}-postgres
+config=${ns}-${name}
+role=${config}-role
+rolereadonly=${config}-readonly
 
-svcname=$name-postgres
+if [ ! -z $deregister ]; then
+  vault delete database/config/${config}
+  vault delete database/roles/${role}
+  vault delete database/roles/${rolereadonly}
+  exit 0
+fi
 
-secret=$(kubectl -n $ns get sts/$svcname -o=json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "POSTGRES_PASSWORD") | .valueFrom.secretKeyRef.name')
+secret=$(kubectl -n $ns get sts/${svcname} -o=json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "POSTGRES_PASSWORD") | .valueFrom.secretKeyRef.name')
 password=$(kubectl -n $ns get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
 
-role=${name}-role
-
-if [ -z $force ] && (vault read database/config/${name} >/dev/null 2>&1); then
-  echo "Already registered $svcname with vault" 1>&2
+if [ -z $force ] && (vault read database/config/${config} >/dev/null 2>&1); then
+  echo "Already registered ${config} with vault" 1>&2
   exit 1
 fi
 
-vault write database/config/${name} \
+vault write database/config/${config} \
   plugin_name="postgresql-database-plugin" \
   allowed_roles="${role}" \
   connection_url="postgresql://{{username}}:{{password}}@${svcname}.${ns}.svc.cluster.local:5432/postgres?sslmode=disable" \
@@ -86,8 +96,15 @@ vault write database/config/${name} \
   password="${password}"
 
 vault write database/roles/${role} \
-  db_name="${name}" \
+  db_name="${config}" \
   creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolecreate.sql" \
+  revocation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerevoke.sql" \
+  default_ttl="${ttl}" \
+  max_ttl="${maxttl}"
+
+vault write database/roles/${rolereadonly} \
+  db_name="${config}" \
+  creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolereadonlycreate.sql" \
   revocation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerevoke.sql" \
   default_ttl="${ttl}" \
   max_ttl="${maxttl}"

@@ -76,12 +76,12 @@ mkdir -p $outdir
 
 passfile=dbpass
 # create password file ifne
-passpath="$outdir/$passfile"
+passpath="${outdir}/${passfile}"
 if [ ! -e $passpath ]; then
   gen_pass $passlen > $passpath
 fi
 
-outfile=$outdir/kustomization.yaml
+outfile=${outdir}/kustomization.yaml
 exec 3>$outfile
 
 # generate output

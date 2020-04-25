@@ -12,20 +12,25 @@ fi
 usage() {
   cat <<EOF 1>&2
 USAGE:
-    $BIN_NAME [OPTIONS] <name> <pgname>
+    $BIN_NAME [OPTIONS] <pgns> <pgname> <name>
 
 OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
         Default is default.
+    -o <directory>
+        Output config to directory.
+        Default is the current directory.
     -h
         Print this help.
 
 ARGS:
-    <name>
-        The name of the application.
+    <pgns>
+        The name of the postgres service namespace.
     <pgname>
         The name of the postgres service.
+    <name>
+        The name of the application.
 EOF
 }
 
@@ -35,28 +40,56 @@ usage_exit() {
 }
 
 ns=default
-name=
+outdir=.
+pgns=
 pgname=
+name=
 
-while getopts ':n:h' opt; do
+while getopts ':n:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
+    o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
   esac
 done
 shift $(($OPTIND - 1))
-name="$1"
+pgns="$1"
 pgname="$2"
+name="$3"
 
 # validation
-if [ -z $name ]; then
+if [ -z $pgns ]; then
   usage_exit
 fi
 if [ -z $pgname ]; then
   usage_exit
 fi
+if [ -z $name ]; then
+  usage_exit
+fi
 
-export VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200/}
+policydir=${outdir}/policy
+mkdir -p $policydir
 
-echo $ns $name $pgname
+config=${pgns}-${pgname}
+role=${config}-role
+rolereadonly=${config}-readonly
+
+outfile=${policydir}/${config}.policy.hcl
+exec 3>$outfile
+
+(
+cat <<EOF
+path "database/creds/${role}" {
+  capabilities = ["read"]
+}
+path "database/creds/${rolereadonly}" {
+  capabilities = ["read"]
+}
+EOF
+) 1>&3
+
+exec 3>&-
+
+connect_write_app_policy $policydir $ns $name
