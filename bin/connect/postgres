@@ -72,11 +72,11 @@ fi
 policydir=${outdir}/policy
 mkdir -p $policydir
 
-config=${pgns}-${pgname}
-role=${config}-role
-rolereadonly=${config}-readonly
+appname=${pgns}-${pgname}
+role=${appname}-role
+rolero=${appname}-ro
 
-outfile=${policydir}/${config}.policy.hcl
+outfile=${policydir}/${appname}.policy.hcl
 exec 3>$outfile
 
 (
@@ -84,7 +84,7 @@ cat <<EOF
 path "database/creds/${role}" {
   capabilities = ["read"]
 }
-path "database/creds/${rolereadonly}" {
+path "database/creds/${rolero}" {
   capabilities = ["read"]
 }
 EOF

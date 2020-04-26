@@ -69,26 +69,26 @@ if [ -z $name ]; then
 fi
 
 svcname=${name}-postgres
-config=${ns}-${name}
-role=${config}-role
-rolereadonly=${config}-readonly
+appname=${ns}-${name}
+role=${appname}-role
+rolero=${appname}-ro
 
 if [ ! -z $deregister ]; then
-  vault delete database/config/${config}
+  vault delete database/config/${appname}
   vault delete database/roles/${role}
-  vault delete database/roles/${rolereadonly}
+  vault delete database/roles/${rolero}
   exit 0
 fi
 
 secret=$(kubectl -n $ns get sts/${svcname} -o=json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "POSTGRES_PASSWORD") | .valueFrom.secretKeyRef.name')
 password=$(kubectl -n $ns get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
 
-if [ -z $force ] && (vault read database/config/${config} >/dev/null 2>&1); then
-  echo "Already registered ${config} with vault" 1>&2
+if [ -z $force ] && (vault read database/config/${appname} >/dev/null 2>&1); then
+  echo "Already registered ${appname} with vault" 1>&2
   exit 1
 fi
 
-vault write database/config/${config} \
+vault write database/config/${appname} \
   plugin_name="postgresql-database-plugin" \
   allowed_roles="${role}" \
   connection_url="postgresql://{{username}}:{{password}}@${svcname}.${ns}.svc.cluster.local:5432/postgres?sslmode=disable" \
@@ -96,15 +96,15 @@ vault write database/config/${config} \
   password="${password}"
 
 vault write database/roles/${role} \
-  db_name="${config}" \
+  db_name="${appname}" \
   creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolecreate.sql" \
   revocation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerevoke.sql" \
   default_ttl="${ttl}" \
   max_ttl="${maxttl}"
 
-vault write database/roles/${rolereadonly} \
-  db_name="${config}" \
-  creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolereadonlycreate.sql" \
+vault write database/roles/${rolero} \
+  db_name="${appname}" \
+  creation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerocreate.sql" \
   revocation_statements="@${FLIGHTCTL_ROOT}/data/postgres/rolerevoke.sql" \
   default_ttl="${ttl}" \
   max_ttl="${maxttl}"
