@@ -7,7 +7,7 @@ if [ -z $FLIGHTCTL_ROOT ]; then
   exit 1
 fi
 
-. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
 
 SELF=$BIN_NAME
 
@@ -20,7 +20,7 @@ SERVICES:
     postgres
         Register postgres instance.
     help
-        Print this help
+        Print this help.
 EOF
 }
 

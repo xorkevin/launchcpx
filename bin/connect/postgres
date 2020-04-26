@@ -7,7 +7,7 @@ if [ -z $FLIGHTCTL_ROOT ]; then
   exit 1
 fi
 
-. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
 
 usage() {
   cat <<EOF 1>&2
@@ -18,12 +18,6 @@ OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
         Default is default.
-    -t <ttl>
-        Time to live duration of vault kube role token.
-        Default is 1h.
-    -m <maxttl>
-        Max time to live duration of vault kube role token.
-        Default is 24h.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -46,8 +40,6 @@ usage_exit() {
 }
 
 ns=default
-ttl='1h'
-maxttl='24h'
 outdir=.
 pgns=
 pgname=
@@ -56,7 +48,6 @@ name=
 while getopts ':n:t:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
-    t) ttl="$OPTARG";;
     o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
@@ -100,6 +91,3 @@ EOF
 ) 1>&3
 
 exec 3>&-
-
-connect_write_app_policy $policydir $ns $name
-connect_write_kube_role $ns $name $ttl $maxttl

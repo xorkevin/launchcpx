@@ -4,7 +4,7 @@ set -e
 
 export FLIGHTCTL_ROOT=${0%/*}
 
-. "$FLIGHTCTL_ROOT/_flightctl_lib.sh"
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
 
 SELF=flightctl
 
@@ -21,7 +21,7 @@ COMMANDS:
     connect
         Connect applications with services.
     help
-        Print this help
+        Print this help.
 EOF
 }
 
