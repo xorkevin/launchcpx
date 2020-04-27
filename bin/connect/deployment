@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $BIN_NAME [OPTIONS] <name>
+
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+        Default is default.
+    -o <directory>
+        Output config to directory.
+        Default is the current directory.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name of the application.
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+ns=default
+outdir=.
+name=
+
+while getopts ':n:o:h' opt; do
+  case $opt in
+    n) ns="$OPTARG";;
+    o) outdir="$OPTARG";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+
+# validation
+if [ -z $name ]; then
+  usage_exit
+fi
+
+rsrcdir=${outdir}/rsrc
+
+mkdir -p $rsrcdir
+
+outfile=${rsrcdir}/serviceaccount.yaml
+exec 3>$outfile
+
+(
+cat <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${name}
+EOF
+) 1>&3
+
+exec 3>&-
