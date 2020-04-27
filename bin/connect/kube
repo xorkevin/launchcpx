@@ -18,17 +18,9 @@ OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
         Default is default.
-    -t <ttl>
-        Time to live duration of vault kube role token.
-        Default is 1h.
-    -m <maxttl>
-        Max time to live duration of vault kube role token.
-        Default is 24h.
-    -k <directory>
-        Read config from directory.
+    -o <directory>
+        Output config to directory.
         Default is the current directory.
-    -d
-        Disconnect from kube.
     -h
         Print this help.
 
@@ -44,19 +36,13 @@ usage_exit() {
 }
 
 ns=default
-ttl='1h'
-maxttl='24h'
-kdir=.
+outdir=.
 name=
-disconnect=
 
-while getopts ':n:t:m:k:dh' opt; do
+while getopts ':n:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
-    t) ttl="$OPTARG";;
-    m) maxttl="$OPTARG";;
-    k) kdir="$OPTARG";;
-    d) disconnect="1";;
+    o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
   esac
@@ -69,29 +55,20 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-appname=${ns}-${name}
-role=${appname}-role
+rsrcdir=${outdir}/rsrc
 
-if [ ! -z $disconnect ]; then
-  vault policy delete ${appname}
-  vault delete auth/kubernetes/role/${role}
-  exit 0
-fi
+mkdir -p $rsrcdir
 
-if [ ! -d $kdir ]; then
-  echo "$kdir is not a directory." 1>&2
-  exit 1
-fi
+outfile=${rsrcdir}/serviceaccount.yaml
+exec 3>$outfile
 
-policydir=${kdir}/policy
-if [ -d $policydir ]; then
-  policyfiles=$(find $policydir -type f -name '*.policy.hcl')
-  cat $policyfiles | vault policy write ${appname} -
-fi
+(
+cat <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${name}
+EOF
+) 1>&3
 
-vault write auth/kubernetes/role/${role} \
-  bound_service_account_names="$name" \
-  bound_service_account_namespaces="$ns" \
-  policies="$appname" \
-  ttl="$ttl" \
-  max_ttl="$maxttl"
+exec 3>&-

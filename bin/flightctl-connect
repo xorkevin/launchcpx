@@ -19,10 +19,10 @@ USAGE:
 SERVICES:
     postgres
         Connect an application to a postgres instance.
+    vault
+        Connect an application to vault.
     kube
         Connect an application to kube.
-    deployment
-        Connect an application kube deployment.
     help
         Print this help.
 EOF
@@ -45,8 +45,8 @@ export BIN_NAME="$BIN_NAME $cmd"
 
 case $cmd in
   'postgres') "${FLIGHTCTL_ROOT}/connect/postgres" "$@";;
+  'vault') "${FLIGHTCTL_ROOT}/connect/vault" "$@";;
   'kube') "${FLIGHTCTL_ROOT}/connect/kube" "$@";;
-  'deployment') "${FLIGHTCTL_ROOT}/connect/deployment" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac
