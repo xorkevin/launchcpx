@@ -20,9 +20,13 @@ spec:
           command: ['sh', '-c']
           args:
             - >-
-              k=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
+              echo 'begin genpass'
+              && k=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
+              && echo 'generate password'
               && echo -n $k > /home/pass/pass
+              && echo 'write password to shared volume with initvault'
               && echo "requirepass $k" > /etc/redispass/pass.conf
+              && echo 'write password to shared volume with redis'
           env:
             - name: 'PASS_LEN'
               valueFrom:
@@ -40,10 +44,15 @@ spec:
           command: ['sh', '-c']
           args:
             - >-
-              mkdir -p /home/vault
+              echo 'begin initvault'
+              && mkdir -p /home/vault
+              && echo 'create vault home'
               && vault agent -config=/etc/vault/agent-config.hcl
+              && echo 'authenticate with vault'
               && export VAULT_TOKEN=$(cat /home/vault/.token)
+              && echo 'read vault token'
               && vault kv put $KV_PATH password=$(cat /home/pass/pass)
+              && echo 'write password to vault kv'
           env:
             - name: 'VAULT_ADDR'
               valueFrom:

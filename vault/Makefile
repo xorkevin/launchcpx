@@ -14,8 +14,8 @@ ROOT_TOKEN=$(shell jq -r '.root_token' $(KEYFILE))
 SA_NAME=vault
 SA_SECRET=$(shell $(KUBECTL) get sa/$(SA_NAME) -o=json | jq -r '.secrets[].name')
 SA_TOKEN=$(shell $(KUBECTL) get secrets/$(SA_SECRET) -o=json | jq -r '.data.token' | base64 -d)
-SA_CRT=$(shell $(KUBECTL) get secrets/$(SA_SECRET) -o=json | jq -r '.data["ca.crt"]' | base64 -d)
-KUBE_HOST=$(shell kubectl get svc/kubernetes -o=json | jq -r '.spec.clusterIP')
+SA_CRT_CMD=$(KUBECTL) get secrets/$(SA_SECRET) -o=json | jq -r '.data["ca.crt"]' | base64 -d
+KUBE_HOST=kubernetes.default.svc.cluster.local
 
 VAULTPOD=vault-0
 KUBEEXEC=$(KUBECTL) exec -it $(VAULTPOD) --
@@ -61,16 +61,13 @@ roottoken:
 login:
 	@$(VAULT) login $(ROOT_TOKEN)
 
-.PHONY: satoken sacrt kubehost
+.PHONY: satoken sacrt
 
 satoken:
 	@echo $(SA_TOKEN)
 
 sacrt:
-	@echo $(SA_CRT)
-
-kubehost:
-	@echo $(KUBE_HOST)
+	@$(SA_CRT_CMD)
 
 .PHONY: enable-kube config-kube enable-db
 
@@ -78,10 +75,10 @@ enable-kube:
 	$(VAULT) auth enable kubernetes
 
 config-kube:
-	@$(VAULT) write auth/kubernetes/config \
+	@$(SA_CRT_CMD) | $(VAULT) write auth/kubernetes/config \
 		token_reviewer_jwt="$(SA_TOKEN)" \
 		kubernetes_host="https://$(KUBE_HOST):443" \
-		kubernetes_ca_cert="$(SA_CRT)"
+		kubernetes_ca_cert=-
 
 enable-db:
 	$(VAULT) secrets enable database

@@ -64,10 +64,10 @@ exec 3>$outfile
 
 (
 cat <<EOF
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: 'v1'
+kind: 'ServiceAccount'
 metadata:
-  name: ${name}
+  name: '${name}'
 EOF
 ) 1>&3
 
