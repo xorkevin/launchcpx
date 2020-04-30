@@ -29,7 +29,7 @@ OPTIONS:
         Default is 8200.
     -c <vault kv path>
         Write the generated password under the vault kv path.
-        Default is kv/creds.
+        Default is kv/infra.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -51,7 +51,7 @@ ns='default'
 passlen=128
 vaultservice='vault.vault'
 vaultport=8200
-kvprefix='kv/creds'
+kvprefix='kv/infra'
 outdir='.'
 name=
 
@@ -77,8 +77,7 @@ fi
 
 vaultaddr="${vaultservice}.svc.cluster.local:${vaultport}"
 
-appname="${ns}-${name}"
-kvpath="${kvprefix}/${appname}"
+kvpath="${kvprefix}/${ns}/${name}"
 
 mkdir -p $outdir
 

@@ -1,0 +1,87 @@
+#!/bin/sh
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $BIN_NAME [OPTIONS] <name>
+
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+        Default is default.
+    -t <ttl>
+        Time to live duration of vault access tokens.
+        Default is 1m.
+    -m <maxttl>
+        Max time to live duration of vault access tokens.
+        Default is 5m.
+    -d
+        Deregister role.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name of the redis service.
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+ns='default'
+ttl='1m'
+maxttl='5m'
+name=
+deregister=
+
+while getopts ':n:t:m:fdh' opt; do
+  case $opt in
+    n) ns="$OPTARG";;
+    t) ttl="$OPTARG";;
+    m) maxttl="$OPTARG";;
+    d) deregister="1";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+
+# validation
+if [ -z $name ]; then
+  usage_exit
+fi
+
+appname=${ns}-${name}
+role=${appname}-role
+
+if [ ! -z $deregister ]; then
+  vault policy delete ${appname}
+  vault delete auth/kubernetes/role/${role}
+  exit 0
+fi
+
+vault policy write ${appname} - <<EOF
+path "kv/infra/data/${ns}/${name}" {
+  capabilities = ["create", "update"]
+}
+EOF
+
+vault write auth/kubernetes/role/${role} \
+  bound_service_account_names="${name}-redis" \
+  bound_service_account_namespaces="$ns" \
+  policies="$appname" \
+  ttl="$ttl" \
+  max_ttl="$maxttl"
