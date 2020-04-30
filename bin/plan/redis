@@ -17,8 +17,6 @@ USAGE:
 OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
-    -c <init script dir>
-        Add init script directory containing *.sql and *.sh files.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
         Default is 32.
@@ -30,7 +28,7 @@ OPTIONS:
 
 ARGS:
     <name>
-        The name prefixes all resources of the postgres deployment.
+        The name prefixes all resources of the redis deployment.
 EOF
 }
 
@@ -40,15 +38,13 @@ usage_exit() {
 }
 
 ns=
-configdir=
 passlen=32
 outdir=.
 name=
 
-while getopts ':n:c:l:o:h' opt; do
+while getopts ':n:l:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
-    c) configdir="$OPTARG";;
     l) passlen=$OPTARG;;
     o) outdir="$OPTARG";;
     h) usage; exit 0;;
@@ -63,23 +59,7 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-configfiles=
-if [ ! -z $configdir ]; then
-  if [ ! -d $configdir ]; then
-    echo "$configdir is not a directory." 1>&2
-    exit 1
-  fi
-  configfiles=$(find $configdir -type f \( -name '*.sql' -o -name '*.sh' \))
-fi
-
 mkdir -p $outdir
-
-passfile=dbpass
-# create password file ifne
-passpath="${outdir}/${passfile}"
-if [ ! -e $passpath ]; then
-  gen_pass $passlen > $passpath
-fi
 
 outfile=${outdir}/kustomization.yaml
 exec 3>$outfile
@@ -100,30 +80,17 @@ fi
 cat <<EOF
 namePrefix: '${name}-'
 commonLabels:
-  app.kubernetes.io/name: 'postgres'
-  app.kubernetes.io/instance: 'postgres-${name}'
-  app.kubernetes.io/part-of: 'postgres-${name}'
+  app.kubernetes.io/name: 'redis'
+  app.kubernetes.io/instance: 'redis-${name}'
+  app.kubernetes.io/part-of: 'redis-${name}'
   app.kubernetes.io/managed-by: 'launchcpx'
 bases:
-  - 'github.com/xorkevin/launchcpx//base/postgres'
-secretGenerator:
-  - name: 'postgres-pass'
-    files:
-      - 'password=${passfile}'
-    type: 'Opaque'
-EOF
-
-if [ ! -z $configfiles ]; then
-  cat <<EOF
+  - 'github.com/xorkevin/launchcpx//base/redis'
 configMapGenerator:
-  - name: 'postgres-initscripts'
-    files:
+  - name: 'redis-opts'
+    literals:
+      - 'passlen=${passlen}'
 EOF
-  for file in $configfiles; do
-    f=$(realpath --relative-to=$outdir $file)
-    echo "      - '${f}'"
-  done
-fi
 ) 1>&3
 
 exec 3>&-

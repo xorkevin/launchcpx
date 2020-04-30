@@ -1,0 +1,51 @@
+apiVersion: 'apps/v1'
+kind: 'StatefulSet'
+metadata:
+  name: 'redis'
+spec:
+  selector:
+    matchLabels:
+      component: 'redis-server'
+  serviceName: 'redis-internal'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: 'redis-server'
+    spec:
+      initContainers:
+        - image: 'busybox:1'
+          command: ['sh', '-c']
+          args:
+            - >-
+              head -c ${PASS_LEN:-32} < /dev/urandom
+              | base64 | tr -d = | tr +/ -_
+              > /etc/redispass/pass.conf
+          env:
+            - name: 'PASS_LEN'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'passlen'
+                  optional: true
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/redispass'
+      containers:
+        - image: 'redis:5-alpine'
+          name: 'redis'
+          ports:
+            - containerPort: 6379
+              name: 'redis'
+          volumeMounts:
+            - name: 'config'
+              mountPath: '/etc/redis'
+            - name: 'config-pass'
+              mountPath: '/etc/redispass'
+      volumes:
+        - name: 'config'
+          configMap:
+            name: 'redis-config'
+            optional: true
+        - name: 'config-pass'
+          emptyDir: {}
