@@ -14,8 +14,8 @@ spec:
         component: 'postgres-server'
     spec:
       containers:
-        - image: 'postgres:12-alpine'
-          name: 'postgres'
+        - name: 'postgres'
+          image: 'postgres:12-alpine'
           env:
             - name: 'POSTGRES_PASSWORD'
               valueFrom:

@@ -14,7 +14,8 @@ spec:
         component: 'redis-server'
     spec:
       initContainers:
-        - image: 'busybox:1'
+        - name: 'genpass'
+          image: 'busybox:1'
           command: ['sh', '-c']
           args:
             - >-
@@ -33,7 +34,8 @@ spec:
               mountPath: '/etc/redispass'
             - name: 'tmp-pass'
               mountPath: '/home/pass'
-        - image: 'vault:1.4.0'
+        - name: 'initvault'
+          image: 'vault:1.4.0'
           command: ['sh', '-c']
           args:
             - >-
@@ -59,8 +61,8 @@ spec:
             - name: 'tmp-pass'
               mountPath: '/home/pass'
       containers:
-        - image: 'redis:5-alpine'
-          name: 'redis'
+        - name: 'redis'
+          image: 'redis:5-alpine'
           ports:
             - containerPort: 6379
               name: 'redis'
