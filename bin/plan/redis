@@ -75,13 +75,35 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-vaultaddr="${vaultservice}.svc.cluster.local:${vaultport}"
-
+vaultaddr="http://${vaultservice}.svc.cluster.local:${vaultport}/"
 kvpath="${kvprefix}/${ns}/${name}"
+
+appname=${ns}-${name}
+role=${appname}-role
 
 mkdir -p $outdir
 
-outfile=${outdir}/kustomization.yaml
+agentconfigfile="${outdir}/agent-config.hcl"
+cat <<EOF > $agentconfigfile
+exit_after_auth = true
+
+auto_auth {
+  method "kubernetes" {
+    mount_path = "auth/kubernetes"
+    config = {
+      role = "${role}"
+    }
+  }
+
+  sink "file" {
+    config = {
+      path = "/home/vault/.token"
+    }
+  }
+}
+EOF
+
+outfile="${outdir}/kustomization.yaml"
 exec 3>$outfile
 
 # generate output
@@ -104,6 +126,9 @@ configMapGenerator:
       - 'vaultaddr=${vaultaddr}'
       - 'kvpath=${kvpath}'
       - 'passlen=${passlen}'
+  - name: 'redis-agent-config'
+    files:
+      - 'agent-config.hcl'
 EOF
 ) 1>&3
 

@@ -37,7 +37,11 @@ spec:
           command: ['sh', '-c']
           args:
             - >-
-              cat /home/pass/pass | vault kv put $KV_PATH password=-
+              mkdir -p /home/vault
+              && vault agent -config=/etc/vault/agent-config.hcl
+              && export VAULT_TOKEN=$(cat /home/vault/.token)
+              && vault kv put $KV_PATH password=$(cat /home/pass/pass)
+          serviceAccountName: 'redis'
           env:
             - name: 'VAULT_ADDR'
               valueFrom:
@@ -50,6 +54,8 @@ spec:
                   name: 'redis-opts'
                   key: 'kvpath'
           volumeMounts:
+            - name: 'agent-config'
+              mountPath: '/etc/vault'
             - name: 'tmp-pass'
               mountPath: '/home/pass'
       containers:
@@ -67,7 +73,9 @@ spec:
         - name: 'config'
           configMap:
             name: 'redis-config'
-            optional: true
+        - name: 'agent-config'
+          configMap:
+            name: 'redis-agent-config'
         - name: 'config-pass'
           emptyDir: {}
         - name: 'tmp-pass'
