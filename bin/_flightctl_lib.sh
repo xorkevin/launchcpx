@@ -4,7 +4,7 @@ gen_pass() {
   # passlen is bytes of randomness
   # base64 encode is 4/3 times longer
   local passlen=$1
-  head -c $passlen < /dev/urandom | base64 | tr -d = | tr +/ -_
+  head -c $passlen < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_'
 }
 
 check_ns() {

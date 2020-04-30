@@ -17,6 +17,7 @@ USAGE:
 OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
+        Default is default.
     -c <init script dir>
         Add init script directory containing *.sql and *.sh files.
     -l <length>
@@ -39,10 +40,10 @@ usage_exit() {
   exit 2
 }
 
-ns=
+ns='default'
 configdir=
 passlen=128
-outdir=.
+outdir='.'
 name=
 
 while getopts ':n:c:l:o:h' opt; do
@@ -89,15 +90,7 @@ exec 3>$outfile
 cat <<EOF
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
-EOF
-
-if [ ! -z $ns ]; then
-  cat <<EOF
 namespace: '${ns}'
-EOF
-fi
-
-cat <<EOF
 namePrefix: '${name}-'
 commonLabels:
   app.kubernetes.io/name: 'postgres'

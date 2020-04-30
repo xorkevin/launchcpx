@@ -85,3 +85,6 @@ config-kube:
 
 enable-db:
 	$(VAULT) secrets enable database
+
+enable-kv:
+	$(VAULT) secrets enable -version=2 kv

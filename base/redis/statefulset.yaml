@@ -18,9 +18,9 @@ spec:
           command: ['sh', '-c']
           args:
             - >-
-              head -c ${PASS_LEN:-128} < /dev/urandom
-              | base64 | tr -d = | tr +/ -_
-              > /etc/redispass/pass.conf
+              k=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
+              && echo -n $k > /home/pass/pass
+              && echo "requirepass $k" > /etc/redispass/pass.conf
           env:
             - name: 'PASS_LEN'
               valueFrom:
@@ -31,6 +31,27 @@ spec:
           volumeMounts:
             - name: 'config-pass'
               mountPath: '/etc/redispass'
+            - name: 'tmp-pass'
+              mountPath: '/home/pass'
+        - image: 'vault:1.4.0'
+          command: ['sh', '-c']
+          args:
+            - >-
+              cat /home/pass/pass | vault kv put $KV_PATH password=-
+          env:
+            - name: 'VAULT_ADDR'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'vaultaddr'
+            - name: 'KV_PATH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'kvpath'
+          volumeMounts:
+            - name: 'tmp-pass'
+              mountPath: '/home/pass'
       containers:
         - image: 'redis:5-alpine'
           name: 'redis'
@@ -48,4 +69,6 @@ spec:
             name: 'redis-config'
             optional: true
         - name: 'config-pass'
+          emptyDir: {}
+        - name: 'tmp-pass'
           emptyDir: {}

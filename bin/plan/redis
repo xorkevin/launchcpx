@@ -17,9 +17,19 @@ USAGE:
 OPTIONS:
     -n <namespace>
         Use the kubernetes namespace.
+        Default is default.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
         Default is 128.
+    -a <vault service name>
+        Use the vault service.
+        Default is vault.vault.
+    -p <vault service port>
+        Use the port when contacting the vault service.
+        Default is 8200.
+    -c <vault kv path>
+        Write the generated password under the vault kv path.
+        Default is kv/creds.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -37,15 +47,21 @@ usage_exit() {
   exit 2
 }
 
-ns=
+ns='default'
 passlen=128
-outdir=.
+vaultservice='vault.vault'
+vaultport=8200
+kvprefix='kv/creds'
+outdir='.'
 name=
 
-while getopts ':n:l:o:h' opt; do
+while getopts ':n:l:a:p:c:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
     l) passlen=$OPTARG;;
+    a) vaultservice="$OPTARG";;
+    p) vaultport=$OPTARG;;
+    c) kvprefix="$OPTARG";;
     o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
@@ -59,6 +75,11 @@ if [ -z $name ]; then
   usage_exit
 fi
 
+vaultaddr="${vaultservice}.svc.cluster.local:${vaultport}"
+
+appname="${ns}-${name}"
+kvpath="${kvprefix}/${appname}"
+
 mkdir -p $outdir
 
 outfile=${outdir}/kustomization.yaml
@@ -69,15 +90,7 @@ exec 3>$outfile
 cat <<EOF
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
-EOF
-
-if [ ! -z $ns ]; then
-  cat <<EOF
 namespace: '${ns}'
-EOF
-fi
-
-cat <<EOF
 namePrefix: '${name}-'
 commonLabels:
   app.kubernetes.io/name: 'redis'
@@ -89,6 +102,8 @@ bases:
 configMapGenerator:
   - name: 'redis-opts'
     literals:
+      - 'vaultaddr=${vaultaddr}'
+      - 'kvpath=${kvpath}'
       - 'passlen=${passlen}'
 EOF
 ) 1>&3

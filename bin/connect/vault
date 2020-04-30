@@ -43,10 +43,10 @@ usage_exit() {
   exit 2
 }
 
-ns=default
+ns='default'
 ttl='1h'
 maxttl='24h'
-kdir=.
+kdir='.'
 name=
 disconnect=
 

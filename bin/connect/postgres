@@ -40,7 +40,7 @@ usage_exit() {
 }
 
 ns=default
-outdir=.
+outdir='.'
 pgns=
 pgname=
 name=
