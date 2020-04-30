@@ -13,6 +13,7 @@ spec:
       labels:
         component: 'redis-server'
     spec:
+      serviceAccountName: 'redis'
       initContainers:
         - name: 'genpass'
           image: 'busybox:1'
@@ -43,7 +44,6 @@ spec:
               && vault agent -config=/etc/vault/agent-config.hcl
               && export VAULT_TOKEN=$(cat /home/vault/.token)
               && vault kv put $KV_PATH password=$(cat /home/pass/pass)
-          serviceAccountName: 'redis'
           env:
             - name: 'VAULT_ADDR'
               valueFrom:
@@ -82,3 +82,4 @@ spec:
           emptyDir: {}
         - name: 'tmp-pass'
           emptyDir: {}
+  volumeClaimTemplates: []
