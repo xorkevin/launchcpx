@@ -29,7 +29,7 @@ OPTIONS:
         Default is 8200.
     -c <vault kv path>
         Write the generated password under the vault kv path.
-        Default is kv/infra.
+        Default is kv/data/infra.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -51,7 +51,7 @@ ns='default'
 passlen=128
 vaultservice='vault.vault'
 vaultport=8200
-kvprefix='kv/infra'
+kvprefix='kv/data/infra'
 outdir='.'
 name=
 
@@ -75,33 +75,12 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-vaultaddr="http://${vaultservice}.svc.cluster.local:${vaultport}/"
+vaultaddr="http://${vaultservice}.svc.cluster.local:${vaultport}"
 kvpath="${kvprefix}/${ns}/${name}"
-
 appname=${ns}-${name}
 role=${appname}-role
 
 mkdir -p $outdir
-
-agentconfigfile="${outdir}/agent-config.hcl"
-cat <<EOF > $agentconfigfile
-exit_after_auth = true
-
-auto_auth {
-  method "kubernetes" {
-    mount_path = "auth/kubernetes"
-    config = {
-      role = "${role}"
-    }
-  }
-
-  sink "file" {
-    config = {
-      path = "/home/vault/.token"
-    }
-  }
-}
-EOF
 
 outfile="${outdir}/kustomization.yaml"
 exec 3>$outfile
@@ -124,11 +103,9 @@ configMapGenerator:
   - name: 'redis-opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
+      - 'vaultrole=${role}'
       - 'kvpath=${kvpath}'
       - 'passlen=${passlen}'
-  - name: 'redis-agent-config'
-    files:
-      - 'agent-config.hcl'
 EOF
 ) 1>&3
 

@@ -16,17 +16,22 @@ spec:
       serviceAccountName: 'redis'
       initContainers:
         - name: 'genpass'
-          image: 'busybox:1'
+          image: 'alpine:3'
           command: ['sh', '-c']
           args:
             - >-
               echo 'begin genpass'
-              && k=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
+              && apk --no-cache add curl jq
+              && pass=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
               && echo 'generate password'
-              && echo -n $k > /home/pass/pass
-              && echo 'write password to shared volume with initvault'
-              && echo "requirepass $k" > /etc/redispass/pass.conf
-              && echo 'write password to shared volume with redis'
+              && satoken=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              && echo 'read service account token'
+              && token=$(curl -s -X POST -d "{\"jwt\": \"${satoken}\", \"role\": \"${ROLE}\"}" ${VAULT_ADDR}/v1/auth/kubernetes/login | jq -r '.auth.client_token')
+              && echo 'authenticate with vault'
+              && curl -s -H "X-Vault-Token: ${token}" -X POST -d "{\"data\": {\"password\": \"${pass}\"}}" ${VAULT_ADDR}/v1/${KV_PATH} > /dev/null
+              && echo 'write password to vault kv'
+              && echo "requirepass ${pass}" > /etc/redispass/pass.conf
+              && echo 'write password to redis conf'
           env:
             - name: 'PASS_LEN'
               valueFrom:
@@ -34,44 +39,29 @@ spec:
                   name: 'redis-opts'
                   key: 'passlen'
                   optional: true
-          volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/redispass'
-            - name: 'tmp-pass'
-              mountPath: '/home/pass'
-        - name: 'initvault'
-          image: 'vault:1.4.0'
-          command: ['sh', '-c']
-          args:
-            - >-
-              echo 'begin initvault'
-              && mkdir -p /home/vault
-              && echo 'create vault home'
-              && vault agent -config=/etc/vault/agent-config.hcl
-              && echo 'authenticate with vault'
-              && export VAULT_TOKEN=$(cat /home/vault/.token)
-              && echo 'read vault token'
-              && vault kv put $KV_PATH password=$(cat /home/pass/pass)
-              && echo 'write password to vault kv'
-          env:
             - name: 'VAULT_ADDR'
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
                   key: 'vaultaddr'
+            - name: 'ROLE'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'vaultrole'
             - name: 'KV_PATH'
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
                   key: 'kvpath'
           volumeMounts:
-            - name: 'agent-config'
-              mountPath: '/etc/vault'
-            - name: 'tmp-pass'
-              mountPath: '/home/pass'
+            - name: 'config-pass'
+              mountPath: '/etc/redispass'
       containers:
         - name: 'redis'
           image: 'redis:5-alpine'
+          command: ['redis-server']
+          args: ['/etc/redis/redis.conf']
           ports:
             - containerPort: 6379
               name: 'redis'
@@ -84,11 +74,6 @@ spec:
         - name: 'config'
           configMap:
             name: 'redis-config'
-        - name: 'agent-config'
-          configMap:
-            name: 'redis-agent-config'
         - name: 'config-pass'
-          emptyDir: {}
-        - name: 'tmp-pass'
           emptyDir: {}
   volumeClaimTemplates: []
