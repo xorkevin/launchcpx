@@ -21,7 +21,7 @@ OPTIONS:
         Add init script directory containing *.sql and *.sh files.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
-        Default is 32.
+        Default is 128.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -41,7 +41,7 @@ usage_exit() {
 
 ns=
 configdir=
-passlen=32
+passlen=128
 outdir=.
 name=
 

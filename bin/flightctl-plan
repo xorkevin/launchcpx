@@ -19,6 +19,8 @@ USAGE:
 SERVICES:
     postgres
         Generate a postgres kustomization.yaml.
+    redis
+        Generate a redis kustomization.yaml.
     help
         Print this help.
 EOF
@@ -41,6 +43,7 @@ export BIN_NAME="$BIN_NAME $cmd"
 
 case $cmd in
   'postgres') "$FLIGHTCTL_ROOT/plan/postgres" "$@";;
+  'redis') "$FLIGHTCTL_ROOT/plan/redis" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

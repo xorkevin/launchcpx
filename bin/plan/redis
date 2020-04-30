@@ -19,7 +19,7 @@ OPTIONS:
         Use the kubernetes namespace.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
-        Default is 32.
+        Default is 128.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -38,7 +38,7 @@ usage_exit() {
 }
 
 ns=
-passlen=32
+passlen=128
 outdir=.
 name=
 
