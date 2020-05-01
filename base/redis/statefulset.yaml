@@ -22,11 +22,11 @@ spec:
             - >-
               echo 'begin genpass'
               && apk --no-cache add curl jq
-              && pass=$(head -c ${PASS_LEN:-128} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
+              && pass=$(head -c ${PASS_LEN:-64} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
               && echo 'generate password'
               && satoken=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               && echo 'read service account token'
-              && token=$(curl -s -X POST -d "{\"jwt\": \"${satoken}\", \"role\": \"${ROLE}\"}" ${VAULT_ADDR}/v1/auth/kubernetes/login | jq -r '.auth.client_token')
+              && token=$(curl -s -X POST -d "{\"jwt\": \"${satoken}\", \"role\": \"${KV_ROLE}\"}" ${VAULT_ADDR}/v1/auth/kubernetes/login | jq -r '.auth.client_token')
               && echo 'authenticate with vault'
               && curl -s -H "X-Vault-Token: ${token}" -X POST -d "{\"data\": {\"password\": \"${pass}\"}}" ${VAULT_ADDR}/v1/${KV_PATH} > /dev/null
               && echo 'write password to vault kv'
@@ -44,7 +44,7 @@ spec:
                 configMapKeyRef:
                   name: 'redis-opts'
                   key: 'vaultaddr'
-            - name: 'ROLE'
+            - name: 'KV_ROLE'
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
@@ -53,7 +53,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
-                  key: 'kvpath'
+                  key: 'vaultpath'
           volumeMounts:
             - name: 'config-pass'
               mountPath: '/etc/redispass'

@@ -20,16 +20,7 @@ OPTIONS:
         Default is default.
     -l <length>
         Change the generated password length in terms of bytes of randomness.
-        Default is 128.
-    -a <vault service name>
-        Use the vault service.
-        Default is vault.vault.
-    -p <vault service port>
-        Use the port when contacting the vault service.
-        Default is 8200.
-    -c <vault kv path>
-        Write the generated password under the vault kv path.
-        Default is kv/data/infra.
+        Default is 64.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -48,20 +39,14 @@ usage_exit() {
 }
 
 ns='default'
-passlen=128
-vaultservice='vault.vault'
-vaultport=8200
-kvprefix='kv/data/infra'
+passlen=64
 outdir='.'
 name=
 
-while getopts ':n:l:a:p:c:o:h' opt; do
+while getopts ':n:l:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
     l) passlen=$OPTARG;;
-    a) vaultservice="$OPTARG";;
-    p) vaultport=$OPTARG;;
-    c) kvprefix="$OPTARG";;
     o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
@@ -75,10 +60,10 @@ if [ -z $name ]; then
   usage_exit
 fi
 
-vaultaddr="http://${vaultservice}.svc.cluster.local:${vaultport}"
-kvpath="${kvprefix}/${ns}/${name}"
+vaultaddr="http://vault.vault.svc.cluster.local:8200"
 appname=${ns}-${name}
 role=${appname}-role
+kvpath="kv/data/infra/${ns}/${name}"
 
 mkdir -p $outdir
 
@@ -104,7 +89,7 @@ configMapGenerator:
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'
-      - 'kvpath=${kvpath}'
+      - 'vaultpath=${kvpath}'
       - 'passlen=${passlen}'
 EOF
 ) 1>&3
