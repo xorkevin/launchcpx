@@ -16,12 +16,11 @@ spec:
       serviceAccountName: 'redis'
       initContainers:
         - name: 'genpass'
-          image: 'alpine:3'
+          image: 'xorkevin/alpine-utils:3'
           command: ['sh', '-c']
           args:
             - >-
               echo 'begin genpass'
-              && apk --no-cache add curl jq
               && pass=$(head -c ${PASS_LEN:-64} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
               && echo 'generate password'
               && satoken=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
