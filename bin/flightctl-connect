@@ -19,6 +19,8 @@ USAGE:
 SERVICES:
     postgres
         Connect an application to a postgres instance.
+    redis
+        Connect an application to a redis instance.
     vault
         Connect an application to vault.
     kube
@@ -45,6 +47,7 @@ export BIN_NAME="$BIN_NAME $cmd"
 
 case $cmd in
   'postgres') "${FLIGHTCTL_ROOT}/connect/postgres" "$@";;
+  'redis') "${FLIGHTCTL_ROOT}/connect/redis" "$@";;
   'vault') "${FLIGHTCTL_ROOT}/connect/vault" "$@";;
   'kube') "${FLIGHTCTL_ROOT}/connect/kube" "$@";;
   'help') usage; exit 0;;

@@ -12,7 +12,7 @@ fi
 usage() {
   cat <<EOF 1>&2
 USAGE:
-    $BIN_NAME [OPTIONS] <pgns> <pgname>
+    $BIN_NAME [OPTIONS] <kvns> <kvname>
 
 OPTIONS:
     -n <namespace>
@@ -25,10 +25,10 @@ OPTIONS:
         Print this help.
 
 ARGS:
-    <pgns>
-        The name of the postgres service namespace.
-    <pgname>
-        The name of the postgres service.
+    <kvns>
+        The name of the redis service namespace.
+    <kvname>
+        The name of the redis service.
 EOF
 }
 
@@ -39,8 +39,8 @@ usage_exit() {
 
 ns=default
 outdir='.'
-pgns=
-pgname=
+kvns=
+kvname=
 
 while getopts ':n:t:o:h' opt; do
   case $opt in
@@ -51,34 +51,29 @@ while getopts ':n:t:o:h' opt; do
   esac
 done
 shift $(($OPTIND - 1))
-pgns="$1"
-pgname="$2"
+kvns="$1"
+kvname="$2"
 
 # validation
-if [ -z $pgns ]; then
+if [ -z $kvns ]; then
   usage_exit
 fi
-if [ -z $pgname ]; then
+if [ -z $kvname ]; then
   usage_exit
 fi
 
 policydir=${outdir}/policy
 mkdir -p $policydir
 
-appname=${pgns}-${pgname}
-role=${appname}-role
-rolero=${appname}-ro
+appname=${kvns}-${kvname}
 
 outfile=${policydir}/${appname}.policy.hcl
 exec 3>$outfile
 
 (
 cat <<EOF
-path "database/creds/${role}" {
-  capabilities = ["read"]
-}
-path "database/creds/${rolero}" {
-  capabilities = ["read"]
+path "kv/data/infra/${kvns}/${kvname}" {
+  capabilities = ["create", "update"]
 }
 EOF
 ) 1>&3
