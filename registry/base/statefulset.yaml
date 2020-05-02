@@ -1,0 +1,33 @@
+apiVersion: 'apps/v1'
+kind: 'StatefulSet'
+metadata:
+  name: 'registry'
+spec:
+  selector:
+    matchLabels:
+      component: 'registry-server'
+  serviceName: 'registry-internal'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: 'registry-server'
+    spec:
+      containers:
+        - name: 'registry'
+          image: 'registry:2'
+          ports:
+            - containerPort: 5000
+              name: 'registry'
+          volumeMounts:
+            - name: 'data'
+              mountPath: '/var/lib/registry'
+  volumeClaimTemplates:
+    - metadata:
+        name: 'data'
+      spec:
+        accessModes:
+          - 'ReadWriteOnce'
+        resources:
+          requests:
+            storage: '32Gi'
