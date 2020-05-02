@@ -89,7 +89,7 @@ configMapGenerator:
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'
-      - 'vaultpath=${kvpath}'
+      - 'kvpath=${kvpath}'
       - 'passlen=${passlen}'
 EOF
 ) 1>&3

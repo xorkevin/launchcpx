@@ -11,6 +11,9 @@ configMapGenerator:
   - name: 'redis-config'
     files:
       - 'redis.conf'
+  - name: 'init-scripts'
+    files:
+      - 'init.sh'
 resources:
   - 'statefulset.yaml'
   - 'service.yaml'

@@ -17,20 +17,8 @@ spec:
       initContainers:
         - name: 'genpass'
           image: 'xorkevin/alpine-utils:3'
-          command: ['sh', '-c']
-          args:
-            - >-
-              echo 'begin genpass'
-              && pass=$(head -c ${PASS_LEN:-64} < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_')
-              && echo 'generate password'
-              && satoken=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              && echo 'read service account token'
-              && token=$(curl -s -X POST -d "{\"jwt\": \"${satoken}\", \"role\": \"${KV_ROLE}\"}" ${VAULT_ADDR}/v1/auth/kubernetes/login | jq -r '.auth.client_token')
-              && echo 'authenticate with vault'
-              && curl -s -H "X-Vault-Token: ${token}" -X POST -d "{\"data\": {\"password\": \"${pass}\"}}" ${VAULT_ADDR}/v1/${KV_PATH} > /dev/null
-              && echo 'write password to vault kv'
-              && echo "requirepass ${pass}" > /etc/redispass/pass.conf
-              && echo 'write password to redis conf'
+          command: ['sh']
+          args: ['/home/redis/init.sh']
           env:
             - name: 'PASS_LEN'
               valueFrom:
@@ -43,7 +31,7 @@ spec:
                 configMapKeyRef:
                   name: 'redis-opts'
                   key: 'vaultaddr'
-            - name: 'KV_ROLE'
+            - name: 'VAULT_ROLE'
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
@@ -52,10 +40,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: 'redis-opts'
-                  key: 'vaultpath'
+                  key: 'kvpath'
           volumeMounts:
             - name: 'config-pass'
               mountPath: '/etc/redispass'
+            - name: 'init-scripts'
+              mountPath: '/home/redis'
       containers:
         - name: 'redis'
           image: 'redis:5-alpine'
@@ -73,6 +63,9 @@ spec:
         - name: 'config'
           configMap:
             name: 'redis-config'
+        - name: 'init-scripts'
+          configMap:
+            name: 'init-scripts'
         - name: 'config-pass'
           emptyDir: {}
   volumeClaimTemplates: []
