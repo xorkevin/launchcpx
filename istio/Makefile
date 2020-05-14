@@ -9,3 +9,22 @@ devup:
 
 devdown:
 	kubectl delete -k ./base
+
+.PHONY: gateup gatedown
+
+gateup:
+	kubectl apply -k ./gate
+
+gatedown:
+	kubectl delete -k ./gate
+
+.PHONY: ports
+
+INGRESS_HOST=$(shell minikube ip)
+INGRESS_PORT=$(shell kubectl -n istio-system get service istio-ingressgateway -o=json | jq -r '.spec.ports[] | select(.name == "http2") | .nodePort')
+INGRESS_PORT_TLS=$(shell kubectl -n istio-system get service istio-ingressgateway -o=json | jq -r '.spec.ports[] | select(.name == "https") | .nodePort')
+
+ports:
+	@echo 'host:' $(INGRESS_HOST)
+	@echo 'port:' $(INGRESS_PORT)
+	@echo 'tlsport:' $(INGRESS_PORT_TLS)
