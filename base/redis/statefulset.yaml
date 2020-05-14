@@ -6,12 +6,14 @@ spec:
   selector:
     matchLabels:
       component: 'redis-server'
+      version: 'v6-alpine'
   serviceName: 'redis-internal'
   replicas: 1
   template:
     metadata:
       labels:
         component: 'redis-server'
+        version: 'v6-alpine'
     spec:
       serviceAccountName: 'redis'
       initContainers:
@@ -48,7 +50,7 @@ spec:
               mountPath: '/home/redis'
       containers:
         - name: 'redis'
-          image: 'redis:5-alpine'
+          image: 'redis:6-alpine'
           command: ['redis-server']
           args: ['/etc/redis/redis.conf']
           ports:

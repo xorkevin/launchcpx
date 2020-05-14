@@ -6,12 +6,14 @@ spec:
   selector:
     matchLabels:
       component: 'registry-server'
+      version: 'v2'
   serviceName: 'registry-internal'
   replicas: 1
   template:
     metadata:
       labels:
         component: 'registry-server'
+        version: 'v2'
     spec:
       containers:
         - name: 'registry'

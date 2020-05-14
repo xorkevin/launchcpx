@@ -6,12 +6,14 @@ spec:
   selector:
     matchLabels:
       component: 'postgres-server'
+      version: 'v12-alpine'
   serviceName: 'postgres-internal'
   replicas: 1
   template:
     metadata:
       labels:
         component: 'postgres-server'
+        version: 'v12-alpine'
     spec:
       containers:
         - name: 'postgres'

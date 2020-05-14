@@ -3,7 +3,7 @@ kind: 'Kustomization'
 commonLabels:
   app.kubernetes.io/name: 'redis'
   app.kubernetes.io/instance: 'redis'
-  app.kubernetes.io/version: '5'
+  app.kubernetes.io/version: '6'
   app.kubernetes.io/component: 'kvstore'
   app.kubernetes.io/part-of: 'redis'
   app.kubernetes.io/managed-by: 'launchcpx'
