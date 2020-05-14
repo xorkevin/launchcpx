@@ -1,11 +1,7 @@
-NAMESPACE=whoami
-
 .PHONY: devinit devup devdown
 
 devinit:
-	if [ -z $$(kubectl get ns -o=name | grep 'namespace/$(NAMESPACE)') ]; then \
-		kubectl create namespace $(NAMESPACE); \
-	fi
+	kubectl apply -f ./namespace.yaml
 
 devup:
 	kubectl apply -k ./base

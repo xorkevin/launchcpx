@@ -28,9 +28,7 @@ devinit:
 	if [ ! -e $(HELMCHART_DIR) ]; then \
 		git clone $(HELMCHART_REPO) $(HELMCHART_DIR); \
 	fi
-	if [ -z $$(kubectl get ns -o=name | grep 'namespace/$(NAMESPACE)') ]; then \
-		kubectl create namespace $(NAMESPACE); \
-	fi
+	kubectl apply -f ./namespace.yaml
 
 devup:
 	helm install $(HELM_ARGS) -f values.yaml vault ./helmchart

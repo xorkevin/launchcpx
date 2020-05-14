@@ -7,3 +7,7 @@ spec:
   addonComponents:
     prometheus:
       enabled: false
+  values:
+    global:
+      proxy:
+        autoInject: 'disabled'
