@@ -4,7 +4,7 @@ metadata:
   name: 'whoami'
 spec:
   gateways:
-    - 'istio-gateway'
+    - 'istio-system/istio-gateway'
   hosts:
     - 'whoami.dev.home'
   http:

@@ -8,5 +8,12 @@ commonLabels:
   app.kubernetes.io/component: 'istio-controlplane'
   app.kubernetes.io/part-of: 'istio'
   app.kubernetes.io/managed-by: 'launchcpx'
+secretGenerator:
+  - name: 'kiali'
+    literals:
+      - 'username=admin'
+      - 'passphrase=admin'
+generatorOptions:
+  disableNameSuffixHash: true
 resources:
   - 'operator.yaml'
