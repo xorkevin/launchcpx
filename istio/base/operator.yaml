@@ -7,6 +7,8 @@ spec:
   addonComponents:
     prometheus:
       enabled: true
+    grafana:
+      enabled: true
     kiali:
       enabled: true
   values:
