@@ -1,0 +1,109 @@
+#!/bin/sh
+
+set -e
+
+if [ -z $FLIGHTCTL_ROOT ]; then
+  echo "Run flightctl"
+  exit 1
+fi
+
+. "${FLIGHTCTL_ROOT}/_flightctl_lib.sh"
+
+usage() {
+  cat <<EOF 1>&2
+USAGE:
+    $BIN_NAME [OPTIONS] <name>
+
+OPTIONS:
+    -n <namespace>
+        Use the kubernetes namespace.
+        Default is default.
+    -l <length>
+        Change the generated password length in terms of bytes of randomness.
+        Default is 64.
+    -b <backoff>
+        Change request backoff duration in sleep command syntax.
+        Default is 5s.
+    -a <reauth interval>
+        Change vault reauth interval as an integer multiple of backoff.
+        Default is 12.
+    -o <directory>
+        Output config to directory.
+        Default is the current directory.
+    -h
+        Print this help.
+
+ARGS:
+    <name>
+        The name prefixes all resources of the minio deployment.
+EOF
+}
+
+usage_exit() {
+  usage
+  exit 2
+}
+
+ns='default'
+passlen=64
+curlbackoff=5
+curlreauth=12
+outdir='.'
+name=
+
+while getopts ':n:l:o:h' opt; do
+  case $opt in
+    n) ns="$OPTARG";;
+    l) passlen=$OPTARG;;
+    b) curlbackoff=$OPTARG;;
+    a) curlreauth=$OPTARG;;
+    o) outdir="$OPTARG";;
+    h) usage; exit 0;;
+    *) usage_exit;;
+  esac
+done
+shift $(($OPTIND - 1))
+name="$1"
+
+# validation
+if [ -z $name ]; then
+  usage_exit
+fi
+
+vaultaddr="http://vault.vault.svc.cluster.local:8200"
+appname=${ns}-${name}
+role=${appname}-role
+kvpath="kv/data/infra/${ns}/${name}"
+
+mkdir -p $outdir
+
+outfile="${outdir}/kustomization.yaml"
+exec 3>$outfile
+
+# generate output
+(
+cat <<EOF
+apiVersion: 'kustomize.config.k8s.io/v1beta1'
+kind: 'Kustomization'
+namespace: '${ns}'
+namePrefix: '${name}-'
+commonLabels:
+  app.kubernetes.io/name: 'minio'
+  app.kubernetes.io/instance: 'minio-${name}'
+  app.kubernetes.io/part-of: 'minio-${name}'
+  app.kubernetes.io/managed-by: 'launchcpx'
+bases:
+  - 'github.com/xorkevin/launchcpx//base/minio'
+configMapGenerator:
+  - name: 'minio-opts'
+    literals:
+      - 'vaultaddr=${vaultaddr}'
+      - 'vaultrole=${role}'
+      - 'kvpath=${kvpath}'
+      - 'passlen=${passlen}'
+      - 'curlbackoff=${curlbackoff}'
+      - 'curlreauth=${curlreauth}'
+EOF
+) 1>&3
+
+exec 3>&-

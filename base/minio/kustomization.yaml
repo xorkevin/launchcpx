@@ -7,7 +7,13 @@ commonLabels:
   app.kubernetes.io/component: 'objstore'
   app.kubernetes.io/part-of: 'minio'
   app.kubernetes.io/managed-by: 'launchcpx'
+configMapGenerator:
+  - name: 'init-scripts'
+    files:
+      - 'init.sh'
+      - '_init_lib.sh'
 resources:
   - 'statefulset.yaml'
   - 'service.yaml'
   - 'headlessservice.yaml'
+  - 'serviceaccount.yaml'

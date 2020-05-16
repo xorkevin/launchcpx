@@ -21,6 +21,8 @@ SERVICES:
         Generate a postgres kustomization.yaml.
     redis
         Generate a redis kustomization.yaml.
+    minio
+        Generate a minio kustomization.yaml.
     help
         Print this help.
 EOF
@@ -44,6 +46,7 @@ export BIN_NAME="$BIN_NAME $cmd"
 case $cmd in
   'postgres') "$FLIGHTCTL_ROOT/plan/postgres" "$@";;
   'redis') "$FLIGHTCTL_ROOT/plan/redis" "$@";;
+  'minio') "$FLIGHTCTL_ROOT/plan/minio" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

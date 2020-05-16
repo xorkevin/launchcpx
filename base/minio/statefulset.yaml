@@ -15,6 +15,51 @@ spec:
         component: 'minio-server'
         version: 'latest'
     spec:
+      serviceAccountName: 'minio'
+      initContainers:
+        - name: 'genpass'
+          image: 'xorkevin/alpine-utils:3'
+          command: ['sh']
+          args: ['/home/minio/init.sh']
+          env:
+            - name: 'PASS_LEN'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'passlen'
+                  optional: true
+            - name: 'CURL_BACKOFF'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'curlbackoff'
+                  optional: true
+            - name: 'CURL_REAUTH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'curlreauth'
+                  optional: true
+            - name: 'VAULT_ADDR'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'vaultaddr'
+            - name: 'VAULT_ROLE'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'vaultrole'
+            - name: 'KV_PATH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'minio-opts'
+                  key: 'kvpath'
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/miniopass'
+            - name: 'init-scripts'
+              mountPath: '/home/minio'
       containers:
         - name: 'minio'
           image: 'latest'
@@ -26,6 +71,14 @@ spec:
           volumeMounts:
             - name: 'data'
               mountPath: '/var/lib/minio'
+            - name: 'config-pass'
+              mountPath: '/etc/miniopass'
+      volumes:
+        - name: 'init-scripts'
+          configMap:
+            name: 'init-scripts'
+        - name: 'config-pass'
+          emptyDir: {}
   volumeClaimTemplates:
     - metadata:
         name: 'data'
