@@ -2,67 +2,37 @@
 
 set -e
 
-echo2() {
-  echo "$@" 1>&2
-}
+export ROOT_DIR=${0%/*}
 
-read_satoken() {
-  cat /var/run/secrets/kubernetes.io/serviceaccount/token
-}
+. "${ROOT_DIR}/_init_lib.sh"
 
-auth_vault_req() {
-  local satoken=$1
-  local role=$2
+log2 'begin genpass'
 
-  cat <<EOF
-{ "jwt": "${satoken}", "role": "${role}" }
-EOF
-}
+pass=$(gen_pass "${PASS_LEN:-64}")
+log2 'generate password'
 
-auth_vault() {
-  local satoken=$(read_satoken)
-  echo2 'read service account token'
-  local req=$(auth_vault_req $satoken $VAULT_ROLE)
-  curl -s -X POST -d "$req" "${VAULT_ADDR}/v1/auth/kubernetes/login" \
-    | jq -r '.auth.client_token'
-}
+while true; do
+  export VAULT_TOKEN=
+  i=0
+  while [ $i -lt "${CURL_REAUTH:-12}" ]; do
+    if [ -z $VAULT_TOKEN ]; then
+      export VAULT_TOKEN=$(auth_vault)
+      log2 'authenticate with vault'
+    fi
 
-vault_kvput_req() {
-  local val=$1
-  cat <<EOF
-{ "data": $val }
-EOF
-}
+    status=$(vault_kvput "$KV_PATH" "{\"password\": \"${pass}\"}")
+    if is_success "$status"; then
+      log2 'write password to vault kv'
+      break 2
+    fi
+    log2 'error write password to vault kv:' "$(cat /tmp/curlres.txt)"
 
-vault_kvput() {
-  local token=$1
-  local key=$2
-  local val=$3
-
-  local req=$(vault_kvput_req $val)
-  curl -s \
-    -H "X-Vault-Token: ${token}" \
-    -X POST -d "$req" \
-    "${VAULT_ADDR}/v1/${key}" > /dev/null
-}
-
-gen_pass() {
-  local passlen=$1
-  head -c $passlen < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_'
-}
-
-echo2 'begin genpass'
-
-pass=$(gen_pass ${PASS_LEN:-64})
-echo2 'generate password'
-
-token=$(auth_vault)
-echo2 'authenticate with vault'
-
-vault_kvput $token $KV_PATH "{\"password\": \"${pass}\"}"
-echo2 'write password to vault kv'
+    i=$((i + 1))
+    sleep ${CURL_BACKOFF:-5}
+  done
+done
 
 cat <<EOF > /etc/redispass/pass.conf
 requirepass ${pass}
 EOF
-echo2 'write password to redis conf'
+log2 'write password to redis conf'

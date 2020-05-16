@@ -42,7 +42,7 @@ devforward:
 devclean:
 	rm -rf $(KEYDIR)
 
-.PHONY: opinit unseal roottoken login
+.PHONY: opinit unseal seal roottoken login
 
 opinit:
 	mkdir -p $(KEYDIR)
@@ -52,6 +52,9 @@ opinit:
 
 unseal:
 	@$(KUBEVAULT) operator unseal $(UNSEAL_KEY)
+
+seal:
+	@$(VAULT) operator seal
 
 roottoken:
 	@echo $(ROOT_TOKEN)

@@ -28,6 +28,18 @@ spec:
                   name: 'redis-opts'
                   key: 'passlen'
                   optional: true
+            - name: 'CURL_BACKOFF'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'curlbackoff'
+                  optional: true
+            - name: 'CURL_REAUTH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'redis-opts'
+                  key: 'curlreauth'
+                  optional: true
             - name: 'VAULT_ADDR'
               valueFrom:
                 configMapKeyRef:

@@ -21,6 +21,12 @@ OPTIONS:
     -l <length>
         Change the generated password length in terms of bytes of randomness.
         Default is 64.
+    -b <backoff>
+        Change request backoff duration in sleep command syntax.
+        Default is 5s.
+    -a <reauth interval>
+        Change vault reauth interval as an integer multiple of backoff.
+        Default is 12.
     -o <directory>
         Output config to directory.
         Default is the current directory.
@@ -40,6 +46,8 @@ usage_exit() {
 
 ns='default'
 passlen=64
+curlbackoff=5
+curlreauth=12
 outdir='.'
 name=
 
@@ -47,6 +55,8 @@ while getopts ':n:l:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
     l) passlen=$OPTARG;;
+    b) curlbackoff=$OPTARG;;
+    a) curlreauth=$OPTARG;;
     o) outdir="$OPTARG";;
     h) usage; exit 0;;
     *) usage_exit;;
@@ -91,6 +101,8 @@ configMapGenerator:
       - 'vaultrole=${role}'
       - 'kvpath=${kvpath}'
       - 'passlen=${passlen}'
+      - 'curlbackoff=${curlbackoff}'
+      - 'curlreauth=${curlreauth}'
 EOF
 ) 1>&3
 
