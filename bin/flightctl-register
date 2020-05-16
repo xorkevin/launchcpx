@@ -21,6 +21,8 @@ SERVICES:
         Register postgres instance.
     redis
         Register redis instance.
+    minio
+        Register minio instance.
     help
         Print this help.
 EOF
@@ -44,6 +46,7 @@ export BIN_NAME="$BIN_NAME $cmd"
 case $cmd in
   'postgres') "$FLIGHTCTL_ROOT/register/postgres" "$@";;
   'redis') "$FLIGHTCTL_ROOT/register/redis" "$@";;
+  'minio') "$FLIGHTCTL_ROOT/register/minio" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

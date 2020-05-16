@@ -26,9 +26,9 @@ OPTIONS:
 
 ARGS:
     <kvns>
-        The name of the redis service namespace.
+        The name of the minio service namespace.
     <kvname>
-        The name of the redis service.
+        The name of the minio service.
 EOF
 }
 
