@@ -20,4 +20,5 @@ spec:
         - name: 'whoami'
           image: 'xorkevin/whoami'
           ports:
-            - containerPort: 8080
+            - name: 'whoami'
+              containerPort: 8080

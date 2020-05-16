@@ -1,29 +1,31 @@
 apiVersion: 'apps/v1'
 kind: 'StatefulSet'
 metadata:
-  name: 'registry'
+  name: 'minio'
 spec:
   selector:
     matchLabels:
-      component: 'registry-server'
-      version: 'v2'
-  serviceName: 'registry-internal'
+      component: 'minio-server'
+      version: 'latest'
+  serviceName: 'minio-internal'
   replicas: 1
   template:
     metadata:
       labels:
-        component: 'registry-server'
-        version: 'v2'
+        component: 'minio-server'
+        version: 'latest'
     spec:
       containers:
-        - name: 'registry'
-          image: 'registry:2'
+        - name: 'minio'
+          image: 'latest'
+          command: ['server']
+          args: ['/var/lib/minio/data']
           ports:
-            - name: 'registry'
-              containerPort: 5000
+            - name: 'minio'
+              containerPort: 9000
           volumeMounts:
             - name: 'data'
-              mountPath: '/var/lib/registry'
+              mountPath: '/var/lib/minio'
   volumeClaimTemplates:
     - metadata:
         name: 'data'

@@ -54,8 +54,8 @@ spec:
           command: ['redis-server']
           args: ['/etc/redis/redis.conf']
           ports:
-            - containerPort: 6379
-              name: 'redis'
+            - name: 'redis'
+              containerPort: 6379
           volumeMounts:
             - name: 'config'
               mountPath: '/etc/redis'

@@ -1,0 +1,13 @@
+apiVersion: 'kustomize.config.k8s.io/v1beta1'
+kind: 'Kustomization'
+commonLabels:
+  app.kubernetes.io/name: 'minio'
+  app.kubernetes.io/instance: 'minio'
+  app.kubernetes.io/version: 'latest'
+  app.kubernetes.io/component: 'objstore'
+  app.kubernetes.io/part-of: 'minio'
+  app.kubernetes.io/managed-by: 'launchcpx'
+resources:
+  - 'statefulset.yaml'
+  - 'service.yaml'
+  - 'headlessservice.yaml'
