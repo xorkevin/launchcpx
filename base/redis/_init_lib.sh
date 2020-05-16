@@ -35,17 +35,24 @@ auth_vault() {
 }
 
 vault_kvput_req() {
-  local val=$1
+  local opts=$1
+  local val=$2
   cat <<EOF
-{ "data": $val }
+{ "options": $opts, "data": $val }
 EOF
 }
 
 vault_kvput() {
   local key=$1
   local val=$2
+  local cas=$3
 
-  local req=$(vault_kvput_req "$val")
+  opts="{}"
+  if [ -z "$cas" ]; then
+    opts="{ \"cas\": $cas }"
+  fi
+
+  local req=$(vault_kvput_req "$opts" "$val")
   curl -s -w '%{http_code}' -o /tmp/curlres.txt \
     -H "X-Vault-Token: ${VAULT_TOKEN}" \
     -X POST -d "$req" \

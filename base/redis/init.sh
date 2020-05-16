@@ -28,7 +28,7 @@ while true; do
     log2 'error write password to vault kv:' "$(cat /tmp/curlres.txt)"
 
     i=$((i + 1))
-    sleep ${CURL_BACKOFF:-5}
+    sleep "${CURL_BACKOFF:-5}"
   done
 done
 
