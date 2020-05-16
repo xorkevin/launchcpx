@@ -18,8 +18,8 @@ spec:
       containers:
         - name: 'minio'
           image: 'latest'
-          command: ['server']
-          args: ['/var/lib/minio/data']
+          command: ['minio']
+          args: ['server', '/var/lib/minio/data']
           ports:
             - name: 'minio'
               containerPort: 9000
