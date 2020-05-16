@@ -48,7 +48,7 @@ vault_kvput() {
   local cas=$3
 
   opts="{}"
-  if [ -z "$cas" ]; then
+  if [ ! -z "$cas" ]; then
     opts="{ \"cas\": $cas }"
   fi
 
