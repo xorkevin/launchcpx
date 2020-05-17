@@ -1,0 +1,10 @@
+apiVersion: 'v1'
+kind: 'Service'
+metadata:
+  name: 'nats-streaming-internal'
+spec:
+  selector:
+    component: 'nats-streaming-server'
+  ports:
+    - port: 4222
+  clusterIP: 'None'

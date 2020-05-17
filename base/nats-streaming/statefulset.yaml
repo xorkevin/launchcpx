@@ -1,0 +1,85 @@
+apiVersion: 'apps/v1'
+kind: 'StatefulSet'
+metadata:
+  name: 'nats-streaming'
+spec:
+  selector:
+    matchLabels:
+      component: 'nats-streaming-server'
+      version: 'v0.17'
+  serviceName: 'nats-streaming-internal'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: 'nats-streaming-server'
+        version: 'v0.17'
+    spec:
+      serviceAccountName: 'nats-streaming'
+      initContainers:
+        - name: 'genpass'
+          image: 'xorkevin/alpine-utils:3'
+          command: ['sh']
+          args: ['/home/nats-streaming/init.sh']
+          env:
+            - name: 'PASS_LEN'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'passlen'
+                  optional: true
+            - name: 'CURL_BACKOFF'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'curlbackoff'
+                  optional: true
+            - name: 'CURL_REAUTH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'curlreauth'
+                  optional: true
+            - name: 'VAULT_ADDR'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'vaultaddr'
+            - name: 'VAULT_ROLE'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'vaultrole'
+            - name: 'KV_PATH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-streaming-opts'
+                  key: 'kvpath'
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/nats-streaming-pass'
+            - name: 'config'
+              mountPath: '/etc/nats-streaming'
+            - name: 'init-scripts'
+              mountPath: '/home/nats-streaming'
+      containers:
+        - name: 'nats-streaming'
+          image: 'nats-streaming:0.17.0-linux'
+          command: ['/nats-streaming-server']
+          args: ['-sc', '/etc/nats-streaming/server.conf']
+          ports:
+            - name: 'nats-streaming'
+              containerPort: 4222
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/nats-streaming'
+      volumes:
+        - name: 'config'
+          configMap:
+            name: 'nats-streaming-config'
+        - name: 'init-scripts'
+          configMap:
+            name: 'init-scripts'
+        - name: 'config-pass'
+          emptyDir: {}
+  volumeClaimTemplates: []
