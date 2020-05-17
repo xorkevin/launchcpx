@@ -77,13 +77,13 @@ spec:
               mountPath: '/etc/miniopass'
           readinessProbe:
             httpGet:
-              path: /minio/health/ready
+              path: '/minio/health/ready'
               port: 9000
             initialDelaySeconds: 15
             periodSeconds: 15
           livenessProbe:
             httpGet:
-              path: /minio/health/live
+              path: '/minio/health/live'
               port: 9000
             initialDelaySeconds: 15
             periodSeconds: 15
