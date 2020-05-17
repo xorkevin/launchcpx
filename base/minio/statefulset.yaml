@@ -75,6 +75,18 @@ spec:
               mountPath: '/home/minio'
             - name: 'config-pass'
               mountPath: '/etc/miniopass'
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 15
       volumes:
         - name: 'init-scripts'
           configMap:
