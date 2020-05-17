@@ -59,6 +59,15 @@ vault_kvput() {
     "${VAULT_ADDR}/v1/${key}"
 }
 
+vault_kvget() {
+  local key=$1
+
+  curl -s -w '%{http_code}' -o /tmp/curlres.txt \
+    -H "X-Vault-Token: ${VAULT_TOKEN}" \
+    -X GET \
+    "${VAULT_ADDR}/v1/${key}"
+}
+
 gen_pass() {
   local passlen=$1
   head -c "$passlen" < /dev/urandom | base64 | tr -d '\n=' | tr '+/' '-_'

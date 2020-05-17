@@ -62,21 +62,26 @@ spec:
               mountPath: '/home/minio'
       containers:
         - name: 'minio'
-          image: 'latest'
-          command: ['minio']
-          args: ['server', '/var/lib/minio/data']
+          image: 'minio/minio:latest'
+          command: ['sh']
+          args: ['/home/minio/start.sh']
           ports:
             - name: 'minio'
               containerPort: 9000
           volumeMounts:
             - name: 'data'
               mountPath: '/var/lib/minio'
+            - name: 'start-scripts'
+              mountPath: '/home/minio'
             - name: 'config-pass'
               mountPath: '/etc/miniopass'
       volumes:
         - name: 'init-scripts'
           configMap:
             name: 'init-scripts'
+        - name: 'start-scripts'
+          configMap:
+            name: 'start-scripts'
         - name: 'config-pass'
           emptyDir: {}
   volumeClaimTemplates:

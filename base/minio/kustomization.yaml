@@ -12,6 +12,9 @@ configMapGenerator:
     files:
       - 'init.sh'
       - '_init_lib.sh'
+  - name: 'start-scripts'
+    files:
+      - 'start.sh'
 resources:
   - 'statefulset.yaml'
   - 'service.yaml'
