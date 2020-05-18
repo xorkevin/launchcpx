@@ -23,6 +23,8 @@ SERVICES:
         Generate a redis kustomization.yaml.
     minio
         Generate a minio kustomization.yaml.
+    natsstream
+        Generate a nats streaming kustomization.yaml.
     help
         Print this help.
 EOF
@@ -47,6 +49,7 @@ case $cmd in
   'postgres') "$FLIGHTCTL_ROOT/plan/postgres" "$@";;
   'redis') "$FLIGHTCTL_ROOT/plan/redis" "$@";;
   'minio') "$FLIGHTCTL_ROOT/plan/minio" "$@";;
+  'natsstream') "$FLIGHTCTL_ROOT/plan/natsstream" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

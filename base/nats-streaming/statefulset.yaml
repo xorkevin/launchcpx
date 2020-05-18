@@ -71,6 +71,8 @@ spec:
             - name: 'nats-streaming'
               containerPort: 4222
           volumeMounts:
+            - name: 'data'
+              mountPath: '/var/lib/nats-streaming'
             - name: 'config-pass'
               mountPath: '/etc/nats-streaming'
       volumes:
@@ -82,4 +84,12 @@ spec:
             name: 'init-scripts'
         - name: 'config-pass'
           emptyDir: {}
-  volumeClaimTemplates: []
+  volumeClaimTemplates:
+    - metadata:
+        name: 'data'
+      spec:
+        accessModes:
+          - 'ReadWriteOnce'
+        resources:
+          requests:
+            storage: '1Gi'

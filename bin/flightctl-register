@@ -23,6 +23,8 @@ SERVICES:
         Register redis instance.
     minio
         Register minio instance.
+    natsstream
+        Register nats streaming instance.
     help
         Print this help.
 EOF
@@ -47,6 +49,7 @@ case $cmd in
   'postgres') "$FLIGHTCTL_ROOT/register/postgres" "$@";;
   'redis') "$FLIGHTCTL_ROOT/register/redis" "$@";;
   'minio') "$FLIGHTCTL_ROOT/register/minio" "$@";;
+  'natsstream') "$FLIGHTCTL_ROOT/register/natsstream" "$@";;
   'help') usage; exit 0;;
   *) usage_exit;;
 esac

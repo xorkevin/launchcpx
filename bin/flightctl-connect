@@ -23,6 +23,8 @@ SERVICES:
         Connect an application to a redis instance.
     minio
         Connect an application to a minio instance.
+    natsstream
+        Connect an application to a nats streaming instance.
     vault
         Connect an application to vault.
     kube
@@ -51,6 +53,7 @@ case $cmd in
   'postgres') "${FLIGHTCTL_ROOT}/connect/postgres" "$@";;
   'redis') "${FLIGHTCTL_ROOT}/connect/redis" "$@";;
   'minio') "${FLIGHTCTL_ROOT}/connect/minio" "$@";;
+  'natsstream') "${FLIGHTCTL_ROOT}/connect/natsstream" "$@";;
   'vault') "${FLIGHTCTL_ROOT}/connect/vault" "$@";;
   'kube') "${FLIGHTCTL_ROOT}/connect/kube" "$@";;
   'help') usage; exit 0;;
