@@ -6,6 +6,8 @@ spec:
   selector:
     component: 'nats-server'
   ports:
-    - port: 4222
-    - port: 6222
+    - name: 'client'
+      port: 4222
+    - name: 'cluster'
+      port: 6222
   clusterIP: 'None'
