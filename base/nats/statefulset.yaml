@@ -1,0 +1,87 @@
+apiVersion: 'apps/v1'
+kind: 'StatefulSet'
+metadata:
+  name: 'nats'
+spec:
+  selector:
+    matchLabels:
+      component: 'nats-server'
+      version: 'v2'
+  serviceName: 'nats-internal'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: 'nats-server'
+        version: 'v2'
+    spec:
+      serviceAccountName: 'nats'
+      initContainers:
+        - name: 'genpass'
+          image: 'xorkevin/alpine-utils:3'
+          command: ['sh']
+          args: ['/home/nats/init.sh']
+          env:
+            - name: 'PASS_LEN'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'passlen'
+                  optional: true
+            - name: 'CURL_BACKOFF'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'curlbackoff'
+                  optional: true
+            - name: 'CURL_REAUTH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'curlreauth'
+                  optional: true
+            - name: 'VAULT_ADDR'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'vaultaddr'
+            - name: 'VAULT_ROLE'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'vaultrole'
+            - name: 'KV_PATH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'nats-opts'
+                  key: 'kvpath'
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/nats-pass'
+            - name: 'config'
+              mountPath: '/etc/nats'
+            - name: 'init-scripts'
+              mountPath: '/home/nats'
+      containers:
+        - name: 'nats'
+          image: 'nats:2-linux'
+          command: ['/nats-server']
+          args: ['-c', '/etc/nats/server.conf']
+          ports:
+            - name: 'nats'
+              containerPort: 4222
+            - name: 'nats-cluster'
+              containerPort: 6222
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/nats'
+      volumes:
+        - name: 'config'
+          configMap:
+            name: 'nats-config'
+        - name: 'init-scripts'
+          configMap:
+            name: 'init-scripts'
+        - name: 'config-pass'
+          emptyDir: {}
+  volumeClaimTemplates: []
