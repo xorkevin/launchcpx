@@ -18,7 +18,7 @@ gateup:
 gatedown:
 	kubectl delete -k ./gate
 
-.PHONY: ports
+.PHONY: ports devforward
 
 INGRESS_HOST=$(shell minikube ip)
 INGRESS_PORT=$(shell kubectl -n istio-system get service istio-ingressgateway -o=json | jq -r '.spec.ports[] | select(.name == "http2") | .nodePort')
@@ -28,3 +28,8 @@ ports:
 	@echo 'host:' $(INGRESS_HOST)
 	@echo 'port:' $(INGRESS_PORT)
 	@echo 'tlsport:' $(INGRESS_PORT_TLS)
+
+SRC_PORT=8080
+
+devforward:
+	interchange -p $(SRC_PORT) -t $(INGRESS_HOST):$(INGRESS_PORT)
