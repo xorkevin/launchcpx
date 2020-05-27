@@ -76,7 +76,6 @@ svcname=${name}-postgres
 appname=${ns}-${name}
 role=${appname}-role
 rolero=${appname}-ro
-kvpath="kv/data/infra/${ns}/${name}"
 
 if [ ! -z $deregister ]; then
   vault delete database/config/${appname}
@@ -93,7 +92,7 @@ if [ -z $force ] && (vault read database/config/${appname} >/dev/null 2>&1); the
 fi
 
 if [ ! -z $engine ]; then
-  password=$(vault kv get -format=json $kvpath | jq -r '.password')
+  password=$(vault kv get -format=json kv/infra/${ns}/${name} | jq -r '.data.data.password')
 
   if [ -z $password ]; then
     echo "Postgres db password not yet initialized" 1>&2
@@ -109,7 +108,7 @@ if [ ! -z $engine ]; then
 fi
 
 vault policy write ${appname} - <<EOF
-path "${kvpath}" {
+path "kv/data/infra/${ns}/${name}" {
   capabilities = ["create", "update", "read"]
 }
 EOF
