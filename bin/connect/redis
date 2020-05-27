@@ -42,7 +42,7 @@ outdir='.'
 kvns=
 kvname=
 
-while getopts ':n:t:o:h' opt; do
+while getopts ':n:o:h' opt; do
   case $opt in
     n) ns="$OPTARG";;
     o) outdir="$OPTARG";;

@@ -24,6 +24,8 @@ OPTIONS:
     -m <maxttl>
         Max time to live duration of vault access tokens.
         Default is 24h.
+    -e
+        Register with vault db engine
     -f
         Force reregister with vault even if already registered.
     -d
@@ -46,14 +48,16 @@ ns='default'
 ttl='1h'
 maxttl='24h'
 name=
+engine=
 force=
 deregister=
 
-while getopts ':n:t:m:fdh' opt; do
+while getopts ':n:t:m:efdh' opt; do
   case $opt in
     n) ns="$OPTARG";;
     t) ttl="$OPTARG";;
     m) maxttl="$OPTARG";;
+    e) engine="1";;
     f) force="1";;
     d) deregister="1";;
     h) usage; exit 0;;
@@ -72,28 +76,50 @@ svcname=${name}-postgres
 appname=${ns}-${name}
 role=${appname}-role
 rolero=${appname}-ro
+kvpath="kv/data/infra/${ns}/${name}"
 
 if [ ! -z $deregister ]; then
   vault delete database/config/${appname}
+  vault policy delete ${appname}
+  vault delete auth/kubernetes/role/${role}
   vault delete database/roles/${role}
   vault delete database/roles/${rolero}
   exit 0
 fi
-
-secret=$(kubectl -n $ns get sts/${svcname} -o=json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "POSTGRES_PASSWORD") | .valueFrom.secretKeyRef.name')
-password=$(kubectl -n $ns get secrets/${secret} -o=json | jq -r '.data["password"]' | base64 -d)
 
 if [ -z $force ] && (vault read database/config/${appname} >/dev/null 2>&1); then
   echo "Already registered ${appname} with vault" 1>&2
   exit 1
 fi
 
-vault write database/config/${appname} \
-  plugin_name="postgresql-database-plugin" \
-  allowed_roles="${role}" \
-  connection_url="postgresql://{{username}}:{{password}}@${svcname}.${ns}.svc.cluster.local:5432/postgres?sslmode=disable" \
-  username="postgres" \
-  password="${password}"
+if [ ! -z $engine ]; then
+  password=$(vault kv get -format=json $kvpath | jq -r '.password')
+
+  if [ -z $password ]; then
+    echo "Postgres db password not yet initialized" 1>&2
+    exit 1
+  fi
+
+  vault write database/config/${appname} \
+    plugin_name="postgresql-database-plugin" \
+    allowed_roles="${role},${rolero}" \
+    connection_url="postgresql://{{username}}:{{password}}@${svcname}.${ns}.svc.cluster.local:5432/postgres?sslmode=disable" \
+    username="postgres" \
+    password="${password}"
+fi
+
+vault policy write ${appname} - <<EOF
+path "${kvpath}" {
+  capabilities = ["create", "update", "read"]
+}
+EOF
+
+vault write auth/kubernetes/role/${role} \
+  bound_service_account_names="${name}-postgres" \
+  bound_service_account_namespaces="$ns" \
+  policies="$appname" \
+  ttl="1m" \
+  max_ttl="5m"
 
 vault write database/roles/${role} \
   db_name="${appname}" \
