@@ -7,7 +7,13 @@ commonLabels:
   app.kubernetes.io/component: 'database'
   app.kubernetes.io/part-of: 'postgres'
   app.kubernetes.io/managed-by: 'launchcpx'
+configMapGenerator:
+  - name: 'init-scripts'
+    files:
+      - 'init.sh'
+      - '_init_lib.sh'
 resources:
   - 'statefulset.yaml'
   - 'service.yaml'
   - 'headlessservice.yaml'
+  - 'serviceaccount.yaml'

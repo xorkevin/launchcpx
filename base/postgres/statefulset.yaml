@@ -15,15 +15,57 @@ spec:
         component: 'postgres-server'
         version: 'v12-alpine'
     spec:
+      serviceAccountName: 'postgres'
+      initContainers:
+        - name: 'genpass'
+          image: 'xorkevin/alpine-utils:3'
+          command: ['sh']
+          args: ['/home/postgres/init.sh']
+          env:
+            - name: 'PASS_LEN'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'passlen'
+                  optional: true
+            - name: 'CURL_BACKOFF'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'curlbackoff'
+                  optional: true
+            - name: 'CURL_REAUTH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'curlreauth'
+                  optional: true
+            - name: 'VAULT_ADDR'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'vaultaddr'
+            - name: 'VAULT_ROLE'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'vaultrole'
+            - name: 'KV_PATH'
+              valueFrom:
+                configMapKeyRef:
+                  name: 'postgres-opts'
+                  key: 'kvpath'
+          volumeMounts:
+            - name: 'config-pass'
+              mountPath: '/etc/postgrespass'
+            - name: 'init-scripts'
+              mountPath: '/home/postgres'
       containers:
         - name: 'postgres'
           image: 'postgres:12-alpine'
           env:
-            - name: 'POSTGRES_PASSWORD'
-              valueFrom:
-                secretKeyRef:
-                  name: 'postgres-pass'
-                  key: 'password'
+            - name: 'POSTGRES_PASSWORD_FILE'
+              value: '/etc/postgrespass/pass.txt'
             - name: 'POSTGRES_USER'
               value: 'postgres'
             - name: 'POSTGRES_DB'
@@ -40,9 +82,16 @@ spec:
           volumeMounts:
             - name: 'data'
               mountPath: '/var/lib/postgresql'
+            - name: 'config-pass'
+              mountPath: '/etc/postgrespass'
             - name: 'initscripts'
               mountPath: '/docker-entrypoint-initdb.d'
       volumes:
+        - name: 'init-scripts'
+          configMap:
+            name: 'init-scripts'
+        - name: 'config-pass'
+          emptyDir: {}
         - name: 'initscripts'
           configMap:
             name: 'postgres-initscripts'
