@@ -9,6 +9,7 @@ commonLabels:
   app.kubernetes.io/part-of: 'whoami'
   app.kubernetes.io/managed-by: 'launchcpx'
 resources:
+  - 'namespace.yaml'
   - 'deployment.yaml'
   - 'service.yaml'
   - 'virtualservice.yaml'

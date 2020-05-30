@@ -1,7 +1,4 @@
-.PHONY: devinit devup devdown
-
-devinit:
-	kubectl apply -f ./namespace.yaml
+.PHONY: devup devdown
 
 devup:
 	kubectl apply -k ./base

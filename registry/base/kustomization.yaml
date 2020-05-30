@@ -9,6 +9,8 @@ commonLabels:
   app.kubernetes.io/part-of: 'registry'
   app.kubernetes.io/managed-by: 'launchcpx'
 resources:
+  - 'namespace.yaml'
   - 'statefulset.yaml'
   - 'service.yaml'
   - 'headlessservice.yaml'
+  - 'virtualservice.yaml'
