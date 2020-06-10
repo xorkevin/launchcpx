@@ -8,6 +8,11 @@ commonLabels:
   app.kubernetes.io/component: 'whoami'
   app.kubernetes.io/part-of: 'whoami'
   app.kubernetes.io/managed-by: 'launchcpx'
+commonAnnotations:
+  sidecar.istio.io/proxyCPU: '25m'
+  sidecar.istio.io/proxyCPULimit: '25m'
+  sidecar.istio.io/proxyMemory: '50Mi'
+  sidecar.istio.io/proxyMemoryLimit: '50Mi'
 resources:
   - 'namespace.yaml'
   - 'deployment.yaml'
