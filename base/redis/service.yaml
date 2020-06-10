@@ -4,6 +4,6 @@ metadata:
   name: 'redis'
 spec:
   selector:
-    component: 'redis-server'
+    app: 'redis'
   ports:
     - port: 6379

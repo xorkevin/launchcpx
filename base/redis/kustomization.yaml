@@ -8,7 +8,7 @@ commonLabels:
   app.kubernetes.io/part-of: 'redis'
   app.kubernetes.io/managed-by: 'launchcpx'
 configMapGenerator:
-  - name: 'redis-config'
+  - name: 'config'
     files:
       - 'redis.conf'
   - name: 'init-scripts'

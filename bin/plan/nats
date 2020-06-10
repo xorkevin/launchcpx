@@ -87,7 +87,7 @@ commonLabels:
 bases:
   - 'github.com/xorkevin/launchcpx//base/nats'
 configMapGenerator:
-  - name: 'nats-opts'
+  - name: 'opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'

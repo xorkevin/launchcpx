@@ -8,7 +8,7 @@ commonLabels:
   app.kubernetes.io/part-of: 'nats'
   app.kubernetes.io/managed-by: 'launchcpx'
 configMapGenerator:
-  - name: 'nats-config'
+  - name: 'config'
     files:
       - 'server.conf'
   - name: 'init-scripts'

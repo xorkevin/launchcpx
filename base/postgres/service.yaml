@@ -4,6 +4,6 @@ metadata:
   name: 'postgres'
 spec:
   selector:
-    component: 'postgres-server'
+    app: 'postgres'
   ports:
     - port: 5432

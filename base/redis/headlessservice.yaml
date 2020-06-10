@@ -4,7 +4,7 @@ metadata:
   name: 'redis-internal'
 spec:
   selector:
-    component: 'redis-server'
+    app: 'redis'
   ports:
     - port: 6379
   clusterIP: 'None'

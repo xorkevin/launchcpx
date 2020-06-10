@@ -4,6 +4,6 @@ metadata:
   name: 'nats'
 spec:
   selector:
-    component: 'nats-server'
+    app: 'nats'
   ports:
     - port: 4222

@@ -87,7 +87,7 @@ commonLabels:
 bases:
   - 'github.com/xorkevin/launchcpx//base/minio'
 configMapGenerator:
-  - name: 'minio-opts'
+  - name: 'opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'

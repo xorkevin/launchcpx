@@ -4,7 +4,7 @@ metadata:
   name: 'postgres-internal'
 spec:
   selector:
-    component: 'postgres-server'
+    app: 'postgres'
   ports:
     - port: 5432
   clusterIP: 'None'

@@ -4,6 +4,6 @@ metadata:
   name: 'registry'
 spec:
   selector:
-    component: 'registry-server'
+    app: 'registry'
   ports:
     - port: 5000

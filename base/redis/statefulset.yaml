@@ -5,14 +5,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      component: 'redis-server'
+      app: 'redis'
       version: 'v6-alpine'
   serviceName: 'redis-internal'
   replicas: 1
   template:
     metadata:
       labels:
-        component: 'redis-server'
+        app: 'redis'
         version: 'v6-alpine'
     spec:
       serviceAccountName: 'redis'
@@ -25,35 +25,35 @@ spec:
             - name: 'PASS_LEN'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'passlen'
                   optional: true
             - name: 'CURL_BACKOFF'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'curlbackoff'
                   optional: true
             - name: 'CURL_REAUTH'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'curlreauth'
                   optional: true
             - name: 'VAULT_ADDR'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'vaultaddr'
             - name: 'VAULT_ROLE'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'vaultrole'
             - name: 'KV_PATH'
               valueFrom:
                 configMapKeyRef:
-                  name: 'redis-opts'
+                  name: 'opts'
                   key: 'kvpath'
           volumeMounts:
             - name: 'config-pass'
@@ -76,7 +76,7 @@ spec:
       volumes:
         - name: 'config'
           configMap:
-            name: 'redis-config'
+            name: 'config'
         - name: 'init-scripts'
           configMap:
             name: 'init-scripts'

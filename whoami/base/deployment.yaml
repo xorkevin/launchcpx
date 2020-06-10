@@ -6,12 +6,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      component: 'whoami-server'
+      app: 'whoami'
       version: 'v1'
   template:
     metadata:
       labels:
-        component: 'whoami-server'
+        app: 'whoami'
         version: 'v1'
     spec:
       containers:

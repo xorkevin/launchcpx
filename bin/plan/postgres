@@ -100,7 +100,7 @@ commonLabels:
 bases:
   - 'github.com/xorkevin/launchcpx//base/postgres'
 configMapGenerator:
-  - name: 'postgres-opts'
+  - name: 'opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'
@@ -112,7 +112,7 @@ EOF
 
 if [ ! -z $configfiles ]; then
   cat <<EOF
-  - name: 'postgres-initscripts'
+  - name: 'initscripts'
     files:
 EOF
   for file in $configfiles; do

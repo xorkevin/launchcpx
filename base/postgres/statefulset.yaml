@@ -5,14 +5,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      component: 'postgres-server'
+      app: 'postgres'
       version: 'v12-alpine'
   serviceName: 'postgres-internal'
   replicas: 1
   template:
     metadata:
       labels:
-        component: 'postgres-server'
+        app: 'postgres'
         version: 'v12-alpine'
     spec:
       serviceAccountName: 'postgres'
@@ -25,35 +25,35 @@ spec:
             - name: 'PASS_LEN'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'passlen'
                   optional: true
             - name: 'CURL_BACKOFF'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'curlbackoff'
                   optional: true
             - name: 'CURL_REAUTH'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'curlreauth'
                   optional: true
             - name: 'VAULT_ADDR'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'vaultaddr'
             - name: 'VAULT_ROLE'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'vaultrole'
             - name: 'KV_PATH'
               valueFrom:
                 configMapKeyRef:
-                  name: 'postgres-opts'
+                  name: 'opts'
                   key: 'kvpath'
           volumeMounts:
             - name: 'config-pass'
@@ -94,7 +94,7 @@ spec:
           emptyDir: {}
         - name: 'initscripts'
           configMap:
-            name: 'postgres-initscripts'
+            name: 'initscripts'
             optional: true
   volumeClaimTemplates:
     - metadata:

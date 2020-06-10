@@ -4,7 +4,7 @@ metadata:
   name: 'registry-internal'
 spec:
   selector:
-    component: 'registry-server'
+    app: 'registry'
   ports:
     - port: 5000
   clusterIP: 'None'

@@ -4,6 +4,6 @@ metadata:
   name: 'minio'
 spec:
   selector:
-    component: 'minio-server'
+    app: 'minio'
   ports:
     - port: 9000

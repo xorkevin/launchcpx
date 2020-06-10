@@ -4,6 +4,6 @@ metadata:
   name: 'nats-streaming'
 spec:
   selector:
-    component: 'nats-streaming-server'
+    app: 'nats-streaming'
   ports:
     - port: 4222

@@ -8,7 +8,7 @@ commonLabels:
   app.kubernetes.io/part-of: 'nats-streaming'
   app.kubernetes.io/managed-by: 'launchcpx'
 configMapGenerator:
-  - name: 'nats-streaming-config'
+  - name: 'config'
     files:
       - 'server.conf'
   - name: 'init-scripts'

@@ -87,7 +87,7 @@ commonLabels:
 bases:
   - 'github.com/xorkevin/launchcpx//base/redis'
 configMapGenerator:
-  - name: 'redis-opts'
+  - name: 'opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'

@@ -87,7 +87,7 @@ commonLabels:
 bases:
   - 'github.com/xorkevin/launchcpx//base/nats-streaming'
 configMapGenerator:
-  - name: 'nats-streaming-opts'
+  - name: 'opts'
     literals:
       - 'vaultaddr=${vaultaddr}'
       - 'vaultrole=${role}'
