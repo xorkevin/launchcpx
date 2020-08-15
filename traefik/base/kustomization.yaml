@@ -10,5 +10,6 @@ commonLabels:
   app.kubernetes.io/managed-by: 'launchcpx'
 resources:
   - 'namespace.yaml'
+  - 'crd.yaml'
   - 'rbac.yaml'
   - 'service.yaml'
