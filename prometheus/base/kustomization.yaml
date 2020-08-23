@@ -8,6 +8,10 @@ commonLabels:
   app.kubernetes.io/component: 'metrics'
   app.kubernetes.io/part-of: 'prometheus'
   app.kubernetes.io/managed-by: 'launchcpx'
+configMapGenerator:
+  - name: 'config'
+    files:
+      - 'prometheus.yml'
 resources:
   - 'namespace.yaml'
   - 'rbac.yaml'

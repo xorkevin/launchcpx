@@ -15,20 +15,32 @@ spec:
   selector:
     matchLabels:
       app: traefik
+      version: v2.2
   template:
     metadata:
       labels:
         app: traefik
+        version: v2.2
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8082'
+        prometheus.io/path: '/metrics'
     spec:
       serviceAccountName: traefik-ingress-controller
       containers:
         - name: traefik
           image: traefik:v2.2
           args:
-            - --entrypoints.web.address=:80
-            - --entrypoints.tcpep.address=:8000
-            - --entrypoints.udpep.address=:9000/udp
-            - --providers.kubernetescrd
+            - '--entrypoints.web.address=:80'
+            - '--entrypoints.tcpep.address=:8000'
+            - '--entrypoints.udpep.address=:9000/udp'
+            - '--entryPoints.metrics.address=:8082'
+            - '--providers.kubernetescrd'
+            - '--metrics.prometheus=true'
+            - '--metrics.prometheus.buckets="0.100000, 0.300000, 1.200000, 5.000000"'
+            - '--metrics.prometheus.addEntryPointsLabels=true'
+            - '--metrics.prometheus.addServicesLabels=true'
+            - '--metrics.prometheus.entryPoint=metrics'
           ports:
             - name: web
               containerPort: 80
@@ -36,6 +48,8 @@ spec:
               containerPort: 8000
             - name: udpep
               containerPort: 9000
+            - name: metrics
+              containerPort: 8082
 
 ---
 apiVersion: v1

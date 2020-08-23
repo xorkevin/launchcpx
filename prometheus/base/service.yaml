@@ -32,6 +32,10 @@ spec:
       labels:
         app: prometheus
         version: v2.20
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        prometheus.io/path: '/metrics'
     spec:
       serviceAccountName: prometheus-server
       containers:
@@ -52,6 +56,18 @@ spec:
               mountPath: /var/lib/prometheus
             - name: config
               mountPath: /etc/prometheus
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 15
       volumes:
         - name: config
           configMap:
