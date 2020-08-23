@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+spec:
+  selector:
+    matchLabels:
+      app: kube-state-metrics
+      version: v1.9
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kube-state-metrics
+        version: v1.9
+    spec:
+      serviceAccountName: kube-state-metrics
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsUser: 655534
+      containers:
+        - name: kube-state-metrics
+          image: k8s.gcr.io/kube-state-metrics:v1.9.7
+          command: ['/kube-state-metrics']
+          args:
+            - '--port=8080'
+            - '--telemetry-port=8081'
+            - '--collectors=certificatesigningrequests'
+            - '--collectors=configmaps'
+            - '--collectors=cronjobs'
+            - '--collectors=daemonsets'
+            - '--collectors=deployments'
+            - '--collectors=endpoints'
+            - '--collectors=horizontalpodautoscalers'
+            - '--collectors=ingresses'
+            - '--collectors=jobs'
+            - '--collectors=limitranges'
+            - '--collectors=mutatingwebhookconfigurations'
+            - '--collectors=namespaces'
+            - '--collectors=networkpolicies'
+            - '--collectors=nodes'
+            - '--collectors=persistentvolumeclaims'
+            - '--collectors=persistentvolumes'
+            - '--collectors=poddisruptionbudgets'
+            - '--collectors=pods'
+            - '--collectors=replicasets'
+            - '--collectors=replicationcontrollers'
+            - '--collectors=resourcequotas'
+            - '--collectors=secrets'
+            - '--collectors=services'
+            - '--collectors=statefulsets'
+            - '--collectors=storageclasses'
+            - '--collectors=validatingwebhookconfigurations'
+            - '--collectors=verticalpodautoscalers'
+            - '--collectors=volumeattachments'
+          ports:
+            - name: kube-state-metrics
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 15
