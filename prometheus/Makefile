@@ -5,10 +5,10 @@ KUBECTL=kubectl $(KUBE_ARGS)
 .PHONY: devup devdown
 
 devup:
-	kubectl apply -k ./base
+	kubectl apply -k .
 
 devdown:
-	kubectl delete -k ./base
+	kubectl delete -k .
 
 .PHONY: devforward
 
