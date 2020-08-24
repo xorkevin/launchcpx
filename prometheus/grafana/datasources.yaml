@@ -1,0 +1,5 @@
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus.prometheus-system.svc.cluster.local:9090
