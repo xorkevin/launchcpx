@@ -40,11 +40,7 @@ server:
     enabled: true
 
 injector:
-  agentImage:
-    repository: 'vault'
-    tag: '1.4.0'
-    pullPolicy: 'IfNotPresent'
+  enabled: false
 
 ui:
   enabled: true
-  serviceType: 'LoadBalancer'

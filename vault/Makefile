@@ -22,7 +22,7 @@ KUBEEXEC=$(KUBECTL) exec -it $(VAULTPOD) --
 KUBEVAULT=$(KUBEEXEC) vault
 VAULT=VAULT_ADDR=http://127.0.0.1:8200/ vault
 
-.PHONY: devinit devup devdown devforward devclean
+.PHONY: devinit devup devupdate devdown devforward devclean
 
 devinit:
 	if [ ! -e $(HELMCHART_DIR) ]; then \
@@ -32,6 +32,9 @@ devinit:
 
 devup:
 	helm install $(HELM_ARGS) -f values.yaml vault ./helmchart
+
+devupdate:
+	helm upgrade $(HELM_ARGS) -f values.yaml vault ./helmchart
 
 devdown:
 	helm uninstall $(HELM_ARGS) vault
@@ -70,7 +73,7 @@ satoken:
 sacrt:
 	@$(SA_CRT_CMD)
 
-.PHONY: enable-kube config-kube enable-db
+.PHONY: enable-kube config-kube enable-db enable-all
 
 enable-kube:
 	$(VAULT) auth enable kubernetes
@@ -86,3 +89,5 @@ enable-db:
 
 enable-kv:
 	$(VAULT) secrets enable -version=2 kv
+
+enable-all: enable-kube config-kube enable-db enable-kv
