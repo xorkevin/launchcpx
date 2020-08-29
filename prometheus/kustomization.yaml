@@ -1,6 +1,9 @@
 apiVersion: 'kustomize.config.k8s.io/v1beta1'
 kind: 'Kustomization'
 namespace: 'prometheus-system'
+commonLabels:
+  app.kubernetes.io/part-of: 'prometheus'
+  app.kubernetes.io/managed-by: 'launchcpx'
 bases:
   - ./base
   - ./node-exporter

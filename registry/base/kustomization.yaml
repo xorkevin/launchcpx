@@ -5,7 +5,7 @@ commonLabels:
   app.kubernetes.io/name: 'registry'
   app.kubernetes.io/instance: 'registry'
   app.kubernetes.io/version: '2'
-  app.kubernetes.io/component: 'registry'
+  app.kubernetes.io/component: 'container-registry'
   app.kubernetes.io/part-of: 'registry'
   app.kubernetes.io/managed-by: 'launchcpx'
 commonAnnotations:

@@ -5,7 +5,7 @@ commonLabels:
   app.kubernetes.io/name: 'prometheus'
   app.kubernetes.io/instance: 'prometheus'
   app.kubernetes.io/version: '2.20'
-  app.kubernetes.io/component: 'metrics'
+  app.kubernetes.io/component: 'monitoring'
   app.kubernetes.io/part-of: 'prometheus'
   app.kubernetes.io/managed-by: 'launchcpx'
 configMapGenerator:
