@@ -1,14 +1,14 @@
-apiVersion: 'networking.istio.io/v1alpha3'
-kind: 'Gateway'
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
 metadata:
-  name: 'istio-gateway'
+  name: istio-gateway
 spec:
   selector:
-    istio: 'ingressgateway'
+    istio: ingressgateway
   servers:
     - port:
-        name: 'http'
+        name: http
         number: 80
-        protocol: 'HTTP'
+        protocol: HTTP
       hosts:
         - '*.dev.home'

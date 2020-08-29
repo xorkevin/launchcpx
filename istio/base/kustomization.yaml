@@ -1,19 +1,12 @@
-apiVersion: 'kustomize.config.k8s.io/v1beta1'
-kind: 'Kustomization'
-namespace: 'istio-system'
-commonLabels:
-  app.kubernetes.io/name: 'istio-controlplane'
-  app.kubernetes.io/instance: 'istio-controlplane'
-  app.kubernetes.io/version: '1.6'
-  app.kubernetes.io/component: 'service-mesh'
-  app.kubernetes.io/part-of: 'istio'
-  app.kubernetes.io/managed-by: 'launchcpx'
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: istio-system
 secretGenerator:
-  - name: 'kiali'
+  - name: kiali
     literals:
-      - 'username=admin'
-      - 'passphrase=admin'
+      - username=admin
+      - passphrase=admin
 generatorOptions:
   disableNameSuffixHash: true
 resources:
-  - 'operator.yaml'
+  - operator.yaml

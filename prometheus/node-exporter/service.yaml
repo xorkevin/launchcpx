@@ -12,12 +12,16 @@ spec:
   selector:
     matchLabels:
       app: node-exporter
-      version: v1.0
   template:
     metadata:
       labels:
         app: node-exporter
-        version: v1.0
+        app.kubernetes.io/name: node-exporter
+        app.kubernetes.io/instance: node-exporter
+        app.kubernetes.io/version: v1.0
+        app.kubernetes.io/component: node-metrics
+        app.kubernetes.io/part-of: prometheus
+        app.kubernetes.io/managed-by: launchcpx
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9100'
@@ -79,4 +83,4 @@ spec:
   ports:
     - name: metrics
       port: 9100
-  clusterIP: 'None'
+  clusterIP: None

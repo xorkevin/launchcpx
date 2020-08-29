@@ -1,34 +1,38 @@
-apiVersion: 'apps/v1'
-kind: 'Deployment'
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: 'whoami'
+  name: whoami
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: 'whoami'
-      version: 'v1'
+      app: whoami
   template:
     metadata:
       labels:
-        app: 'whoami'
-        version: 'v1'
+        app: whoami
+        app.kubernetes.io/name: whoami
+        app.kubernetes.io/instance: whoami
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/component: whoami
+        app.kubernetes.io/part-of: whoami
+        app.kubernetes.io/managed-by: launchcpx
     spec:
       containers:
-        - name: 'whoami'
-          image: 'xorkevin/whoami'
+        - name: whoami
+          image: xorkevin/whoami
           ports:
-            - name: 'whoami'
+            - name: whoami
               containerPort: 8080
           readinessProbe:
             httpGet:
-              path: '/healthz/ready'
+              path: /healthz/ready
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 15
           livenessProbe:
             httpGet:
-              path: '/healthz/live'
+              path: /healthz/live
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 15

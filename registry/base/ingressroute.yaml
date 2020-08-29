@@ -1,15 +1,15 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: whoami
+  name: registry
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`whoami.dev.home`)
+      match: Host(`docker.pkg.dev.home`)
       services:
         - kind: Service
           scheme: http
-          name: whoami
-          port: 8080
+          name: registry
+          port: 5000

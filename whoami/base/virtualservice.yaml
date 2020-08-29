@@ -1,15 +1,15 @@
-apiVersion: 'networking.istio.io/v1alpha3'
-kind: 'VirtualService'
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
 metadata:
-  name: 'whoami'
+  name: whoami
 spec:
   gateways:
-    - 'istio-system/istio-gateway'
+    - istio-system/istio-gateway
   hosts:
-    - 'whoami.dev.home'
+    - whoami.dev.home
   http:
     - route:
         - destination:
-            host: 'whoami'
+            host: whoami
             port:
               number: 8080

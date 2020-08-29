@@ -8,19 +8,21 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: traefik
-  labels:
-    app: traefik
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: traefik
-      version: v2.2
   template:
     metadata:
       labels:
         app: traefik
-        version: v2.2
+        app.kubernetes.io/name: traefik-controller
+        app.kubernetes.io/instance: traefik-controller
+        app.kubernetes.io/version: v2.2
+        app.kubernetes.io/component: ingress-controller
+        app.kubernetes.io/part-of: traefik
+        app.kubernetes.io/managed-by: launchcpx
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8082'

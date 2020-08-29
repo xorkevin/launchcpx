@@ -1,9 +1,9 @@
-apiVersion: 'v1'
-kind: 'Service'
+apiVersion: v1
+kind: Service
 metadata:
-  name: 'registry'
+  name: registry
 spec:
   selector:
-    app: 'registry'
+    app: registry
   ports:
     - port: 5000
