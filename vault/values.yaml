@@ -23,7 +23,7 @@ server:
           path = "/vault/data"
         }
         telemetry {
-          prometheus_retention_time = "1m"
+          prometheus_retention_time = "10m"
           disable_hostname = true
         }
         service_registration "kubernetes" {}
