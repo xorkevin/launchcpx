@@ -1,107 +1,111 @@
-apiVersion: 'apps/v1'
-kind: 'StatefulSet'
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: 'postgres'
+  name: postgres
 spec:
   selector:
     matchLabels:
-      app: 'postgres'
-      version: 'v12-alpine'
-  serviceName: 'postgres-internal'
+      app: postgres
+  serviceName: postgres-internal
   replicas: 1
   template:
     metadata:
       labels:
-        app: 'postgres'
-        version: 'v12-alpine'
+        app: postgres
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/instance: postgres
+        app.kubernetes.io/version: v12
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: postgres
+        app.kubernetes.io/managed-by: launchcpx
     spec:
-      serviceAccountName: 'postgres'
+      serviceAccountName: postgres
       initContainers:
-        - name: 'genpass'
-          image: 'xorkevin/alpine-utils:3'
+        - name: genpass
+          image: xorkevin/alpine-utils:3
           command: ['sh']
           args: ['/home/postgres/init.sh']
           env:
-            - name: 'PASS_LEN'
+            - name: PASS_LEN
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'passlen'
+                  name: opts
+                  key: passlen
                   optional: true
-            - name: 'CURL_BACKOFF'
+            - name: CURL_BACKOFF
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlbackoff'
+                  name: opts
+                  key: curlbackoff
                   optional: true
-            - name: 'CURL_REAUTH'
+            - name: CURL_REAUTH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlreauth'
+                  name: opts
+                  key: curlreauth
                   optional: true
-            - name: 'VAULT_ADDR'
+            - name: VAULT_ADDR
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultaddr'
-            - name: 'VAULT_ROLE'
+                  name: opts
+                  key: vaultaddr
+            - name: VAULT_ROLE
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultrole'
-            - name: 'KV_PATH'
+                  name: opts
+                  key: vaultrole
+            - name: KV_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'kvpath'
+                  name: opts
+                  key: kvpath
           volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/postgrespass'
-            - name: 'init-scripts'
-              mountPath: '/home/postgres'
+            - name: config-pass
+              mountPath: /etc/postgrespass
+            - name: init-scripts
+              mountPath: /home/postgres
       containers:
-        - name: 'postgres'
-          image: 'postgres:12-alpine'
+        - name: postgres
+          image: postgres:12-alpine
           env:
-            - name: 'POSTGRES_PASSWORD_FILE'
-              value: '/etc/postgrespass/pass.txt'
-            - name: 'POSTGRES_USER'
-              value: 'postgres'
-            - name: 'POSTGRES_DB'
-              value: 'postgres'
-            - name: 'PGDATA'
-              value: '/var/lib/postgresql/data/pgdata'
-            - name: 'POSTGRES_INITDB_ARGS'
+            - name: POSTGRES_PASSWORD_FILE
+              value: /etc/postgrespass/pass.txt
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_INITDB_ARGS
               value: '--auth-local=trust --auth-host=scram-sha-256'
-            - name: 'POSTGRES_HOST_AUTH_METHOD'
-              value: 'scram-sha-256'
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: scram-sha-256
           ports:
-            - name: 'postgres'
+            - name: postgres
               containerPort: 5432
           volumeMounts:
-            - name: 'data'
-              mountPath: '/var/lib/postgresql/data'
-            - name: 'config-pass'
-              mountPath: '/etc/postgrespass'
-            - name: 'initscripts'
-              mountPath: '/docker-entrypoint-initdb.d'
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config-pass
+              mountPath: /etc/postgrespass
+            - name: initscripts
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
-        - name: 'init-scripts'
+        - name: init-scripts
           configMap:
-            name: 'init-scripts'
-        - name: 'config-pass'
+            name: init-scripts
+        - name: config-pass
           emptyDir: {}
-        - name: 'initscripts'
+        - name: initscripts
           configMap:
-            name: 'initscripts'
+            name: initscripts
             optional: true
   volumeClaimTemplates:
     - metadata:
-        name: 'data'
+        name: data
       spec:
         accessModes:
-          - 'ReadWriteOnce'
+          - ReadWriteOnce
         resources:
           requests:
-            storage: '1Gi'
+            storage: 1Gi

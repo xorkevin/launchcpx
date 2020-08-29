@@ -1,9 +1,9 @@
-apiVersion: 'v1'
-kind: 'Service'
+apiVersion: v1
+kind: Service
 metadata:
-  name: 'nats'
+  name: nats
 spec:
   selector:
-    app: 'nats'
+    app: nats
   ports:
     - port: 4222

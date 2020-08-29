@@ -1,95 +1,99 @@
-apiVersion: 'apps/v1'
-kind: 'StatefulSet'
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: 'nats-streaming'
+  name: nats-streaming
 spec:
   selector:
     matchLabels:
-      app: 'nats-streaming'
-      version: 'v0.17'
-  serviceName: 'nats-streaming-internal'
+      app: nats-streaming
+  serviceName: nats-streaming-internal
   replicas: 1
   template:
     metadata:
       labels:
-        app: 'nats-streaming'
-        version: 'v0.17'
+        app: nats-streaming
+        app.kubernetes.io/name: nats-streaming
+        app.kubernetes.io/instance: nats-streaming
+        app.kubernetes.io/version: v0.17
+        app.kubernetes.io/component: pubsub
+        app.kubernetes.io/part-of: nats-streaming
+        app.kubernetes.io/managed-by: launchcpx
     spec:
-      serviceAccountName: 'nats-streaming'
+      serviceAccountName: nats-streaming
       initContainers:
-        - name: 'genpass'
-          image: 'xorkevin/alpine-utils:3'
+        - name: genpass
+          image: xorkevin/alpine-utils:3
           command: ['sh']
           args: ['/home/nats-streaming/init.sh']
           env:
-            - name: 'PASS_LEN'
+            - name: PASS_LEN
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'passlen'
+                  name: opts
+                  key: passlen
                   optional: true
-            - name: 'CURL_BACKOFF'
+            - name: CURL_BACKOFF
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlbackoff'
+                  name: opts
+                  key: curlbackoff
                   optional: true
-            - name: 'CURL_REAUTH'
+            - name: CURL_REAUTH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlreauth'
+                  name: opts
+                  key: curlreauth
                   optional: true
-            - name: 'VAULT_ADDR'
+            - name: VAULT_ADDR
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultaddr'
-            - name: 'VAULT_ROLE'
+                  name: opts
+                  key: vaultaddr
+            - name: VAULT_ROLE
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultrole'
-            - name: 'KV_PATH'
+                  name: opts
+                  key: vaultrole
+            - name: KV_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'kvpath'
+                  name: opts
+                  key: kvpath
           volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/nats-streaming-pass'
-            - name: 'config'
-              mountPath: '/etc/nats-streaming'
-            - name: 'init-scripts'
-              mountPath: '/home/nats-streaming'
+            - name: config-pass
+              mountPath: /etc/nats-streaming-pass
+            - name: config
+              mountPath: /etc/nats-streaming
+            - name: init-scripts
+              mountPath: /home/nats-streaming
       containers:
-        - name: 'nats-streaming'
-          image: 'nats-streaming:0.17.0-linux'
+        - name: nats-streaming
+          image: nats-streaming:0.17.0-linux
           command: ['/nats-streaming-server']
           args: ['-sc', '/etc/nats-streaming/server.conf']
           ports:
-            - name: 'nats-streaming'
+            - name: nats-streaming
               containerPort: 4222
           volumeMounts:
-            - name: 'data'
-              mountPath: '/var/lib/nats-streaming'
-            - name: 'config-pass'
-              mountPath: '/etc/nats-streaming'
+            - name: data
+              mountPath: /var/lib/nats-streaming
+            - name: config-pass
+              mountPath: /etc/nats-streaming
       volumes:
-        - name: 'config'
+        - name: config
           configMap:
-            name: 'config'
-        - name: 'init-scripts'
+            name: config
+        - name: init-scripts
           configMap:
-            name: 'init-scripts'
-        - name: 'config-pass'
+            name: init-scripts
+        - name: config-pass
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:
-        name: 'data'
+        name: data
       spec:
         accessModes:
-          - 'ReadWriteOnce'
+          - ReadWriteOnce
         resources:
           requests:
-            storage: '1Gi'
+            storage: 1Gi

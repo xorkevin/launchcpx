@@ -1,107 +1,111 @@
-apiVersion: 'apps/v1'
-kind: 'StatefulSet'
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: 'minio'
+  name: minio
 spec:
   selector:
     matchLabels:
-      app: 'minio'
-      version: 'latest'
-  serviceName: 'minio-internal'
+      app: minio
+  serviceName: minio-internal
   replicas: 1
   template:
     metadata:
       labels:
-        app: 'minio'
-        version: 'latest'
+        app: minio
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/instance: minio
+        app.kubernetes.io/version: latest
+        app.kubernetes.io/component: objstore
+        app.kubernetes.io/part-of: minio
+        app.kubernetes.io/managed-by: launchcpx
     spec:
-      serviceAccountName: 'minio'
+      serviceAccountName: minio
       initContainers:
-        - name: 'genpass'
-          image: 'xorkevin/alpine-utils:3'
+        - name: genpass
+          image: xorkevin/alpine-utils:3
           command: ['sh']
           args: ['/home/minio/init.sh']
           env:
-            - name: 'PASS_LEN'
+            - name: PASS_LEN
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'passlen'
+                  name: opts
+                  key: passlen
                   optional: true
-            - name: 'CURL_BACKOFF'
+            - name: CURL_BACKOFF
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlbackoff'
+                  name: opts
+                  key: curlbackoff
                   optional: true
-            - name: 'CURL_REAUTH'
+            - name: CURL_REAUTH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlreauth'
+                  name: opts
+                  key: curlreauth
                   optional: true
-            - name: 'VAULT_ADDR'
+            - name: VAULT_ADDR
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultaddr'
-            - name: 'VAULT_ROLE'
+                  name: opts
+                  key: vaultaddr
+            - name: VAULT_ROLE
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultrole'
-            - name: 'KV_PATH'
+                  name: opts
+                  key: vaultrole
+            - name: KV_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'kvpath'
+                  name: opts
+                  key: kvpath
           volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/miniopass'
-            - name: 'init-scripts'
-              mountPath: '/home/minio'
+            - name: config-pass
+              mountPath: /etc/miniopass
+            - name: init-scripts
+              mountPath: /home/minio
       containers:
-        - name: 'minio'
-          image: 'minio/minio:latest'
+        - name: minio
+          image: minio/minio:latest
           command: ['sh']
           args: ['/home/minio/start.sh']
           ports:
-            - name: 'minio'
+            - name: minio
               containerPort: 9000
           volumeMounts:
-            - name: 'data'
-              mountPath: '/var/lib/minio'
-            - name: 'start-scripts'
-              mountPath: '/home/minio'
-            - name: 'config-pass'
-              mountPath: '/etc/miniopass'
+            - name: data
+              mountPath: /var/lib/minio
+            - name: start-scripts
+              mountPath: /home/minio
+            - name: config-pass
+              mountPath: /etc/miniopass
           readinessProbe:
             httpGet:
-              path: '/minio/health/ready'
+              path: /minio/health/ready
               port: 9000
             initialDelaySeconds: 15
             periodSeconds: 15
           livenessProbe:
             httpGet:
-              path: '/minio/health/live'
+              path: /minio/health/live
               port: 9000
             initialDelaySeconds: 15
             periodSeconds: 15
       volumes:
-        - name: 'init-scripts'
+        - name: init-scripts
           configMap:
-            name: 'init-scripts'
-        - name: 'start-scripts'
+            name: init-scripts
+        - name: start-scripts
           configMap:
-            name: 'start-scripts'
-        - name: 'config-pass'
+            name: start-scripts
+        - name: config-pass
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:
-        name: 'data'
+        name: data
       spec:
         accessModes:
-          - 'ReadWriteOnce'
+          - ReadWriteOnce
         resources:
           requests:
-            storage: '32Gi'
+            storage: 32Gi

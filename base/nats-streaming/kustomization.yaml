@@ -1,22 +1,15 @@
-apiVersion: 'kustomize.config.k8s.io/v1beta1'
-kind: 'Kustomization'
-commonLabels:
-  app.kubernetes.io/name: 'nats-streaming'
-  app.kubernetes.io/instance: 'nats-streaming'
-  app.kubernetes.io/version: '0.17'
-  app.kubernetes.io/component: 'pubsub'
-  app.kubernetes.io/part-of: 'nats-streaming'
-  app.kubernetes.io/managed-by: 'launchcpx'
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 configMapGenerator:
-  - name: 'config'
+  - name: config
     files:
-      - 'server.conf'
-  - name: 'init-scripts'
+      - server.conf
+  - name: init-scripts
     files:
-      - 'init.sh'
-      - '_init_lib.sh'
+      - init.sh
+      - _init_lib.sh
 resources:
-  - 'statefulset.yaml'
-  - 'service.yaml'
-  - 'headlessservice.yaml'
-  - 'serviceaccount.yaml'
+  - statefulset.yaml
+  - service.yaml
+  - headlessservice.yaml
+  - serviceaccount.yaml

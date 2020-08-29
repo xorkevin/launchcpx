@@ -88,26 +88,21 @@ exec 3>$outfile
 # generate output
 (
 cat <<EOF
-apiVersion: 'kustomize.config.k8s.io/v1beta1'
-kind: 'Kustomization'
-namespace: '${ns}'
-namePrefix: '${name}-'
-commonLabels:
-  app.kubernetes.io/name: 'postgres'
-  app.kubernetes.io/instance: 'postgres-${name}'
-  app.kubernetes.io/part-of: 'postgres-${name}'
-  app.kubernetes.io/managed-by: 'launchcpx'
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ${ns}
+namePrefix: ${name}-
 bases:
-  - 'github.com/xorkevin/launchcpx//base/postgres'
+  - github.com/xorkevin/launchcpx//base/postgres
 configMapGenerator:
-  - name: 'opts'
+  - name: opts
     literals:
-      - 'vaultaddr=${vaultaddr}'
-      - 'vaultrole=${role}'
-      - 'kvpath=${kvpath}'
-      - 'passlen=${passlen}'
-      - 'curlbackoff=${curlbackoff}'
-      - 'curlreauth=${curlreauth}'
+      - vaultaddr=${vaultaddr}
+      - vaultrole=${role}
+      - kvpath=${kvpath}
+      - passlen=${passlen}
+      - curlbackoff=${curlbackoff}
+      - curlreauth=${curlreauth}
 EOF
 
 if [ ! -z $configfiles ]; then
@@ -117,7 +112,7 @@ if [ ! -z $configfiles ]; then
 EOF
   for file in $configfiles; do
     f=$(realpath --relative-to=$outdir $file)
-    echo "      - '${f}'"
+    echo "      - ${f}"
   done
 fi
 ) 1>&3

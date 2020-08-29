@@ -1,10 +1,10 @@
-apiVersion: 'v1'
-kind: 'Service'
+apiVersion: v1
+kind: Service
 metadata:
-  name: 'nats-streaming-internal'
+  name: nats-streaming-internal
 spec:
   selector:
-    app: 'nats-streaming'
+    app: nats-streaming
   ports:
     - port: 4222
-  clusterIP: 'None'
+  clusterIP: None

@@ -1,87 +1,91 @@
-apiVersion: 'apps/v1'
-kind: 'StatefulSet'
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: 'nats'
+  name: nats
 spec:
   selector:
     matchLabels:
-      app: 'nats'
-      version: 'v2'
-  serviceName: 'nats-internal'
+      app: nats
+  serviceName: nats-internal
   replicas: 1
   template:
     metadata:
       labels:
-        app: 'nats'
-        version: 'v2'
+        app: nats
+        app.kubernetes.io/name: nats
+        app.kubernetes.io/instance: nats
+        app.kubernetes.io/version: v2
+        app.kubernetes.io/component: pubsub
+        app.kubernetes.io/part-of: nats
+        app.kubernetes.io/managed-by: launchcpx
     spec:
-      serviceAccountName: 'nats'
+      serviceAccountName: nats
       initContainers:
-        - name: 'genpass'
-          image: 'xorkevin/alpine-utils:3'
+        - name: genpass
+          image: xorkevin/alpine-utils:3
           command: ['sh']
           args: ['/home/nats/init.sh']
           env:
-            - name: 'PASS_LEN'
+            - name: PASS_LEN
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'passlen'
+                  name: opts
+                  key: passlen
                   optional: true
-            - name: 'CURL_BACKOFF'
+            - name: CURL_BACKOFF
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlbackoff'
+                  name: opts
+                  key: curlbackoff
                   optional: true
-            - name: 'CURL_REAUTH'
+            - name: CURL_REAUTH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'curlreauth'
+                  name: opts
+                  key: curlreauth
                   optional: true
-            - name: 'VAULT_ADDR'
+            - name: VAULT_ADDR
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultaddr'
-            - name: 'VAULT_ROLE'
+                  name: opts
+                  key: vaultaddr
+            - name: VAULT_ROLE
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'vaultrole'
-            - name: 'KV_PATH'
+                  name: opts
+                  key: vaultrole
+            - name: KV_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: 'opts'
-                  key: 'kvpath'
+                  name: opts
+                  key: kvpath
           volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/nats-pass'
-            - name: 'config'
-              mountPath: '/etc/nats'
-            - name: 'init-scripts'
-              mountPath: '/home/nats'
+            - name: config-pass
+              mountPath: /etc/nats-pass
+            - name: config
+              mountPath: /etc/nats
+            - name: init-scripts
+              mountPath: /home/nats
       containers:
-        - name: 'nats'
-          image: 'nats:2-linux'
+        - name: nats
+          image: nats:2-linux
           command: ['/nats-server']
           args: ['-c', '/etc/nats/server.conf']
           ports:
-            - name: 'nats'
+            - name: nats
               containerPort: 4222
-            - name: 'nats-cluster'
+            - name: nats-cluster
               containerPort: 6222
           volumeMounts:
-            - name: 'config-pass'
-              mountPath: '/etc/nats'
+            - name: config-pass
+              mountPath: /etc/nats
       volumes:
-        - name: 'config'
+        - name: config
           configMap:
-            name: 'config'
-        - name: 'init-scripts'
+            name: config
+        - name: init-scripts
           configMap:
-            name: 'init-scripts'
-        - name: 'config-pass'
+            name: init-scripts
+        - name: config-pass
           emptyDir: {}
   volumeClaimTemplates: []

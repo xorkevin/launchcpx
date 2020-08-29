@@ -75,26 +75,21 @@ exec 3>$outfile
 # generate output
 (
 cat <<EOF
-apiVersion: 'kustomize.config.k8s.io/v1beta1'
-kind: 'Kustomization'
-namespace: '${ns}'
-namePrefix: '${name}-'
-commonLabels:
-  app.kubernetes.io/name: 'nats'
-  app.kubernetes.io/instance: 'nats-${name}'
-  app.kubernetes.io/part-of: 'nats-${name}'
-  app.kubernetes.io/managed-by: 'launchcpx'
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ${ns}
+namePrefix: ${name}-
 bases:
-  - 'github.com/xorkevin/launchcpx//base/nats'
+  - github.com/xorkevin/launchcpx//base/nats
 configMapGenerator:
-  - name: 'opts'
+  - name: opts
     literals:
-      - 'vaultaddr=${vaultaddr}'
-      - 'vaultrole=${role}'
-      - 'kvpath=${kvpath}'
-      - 'passlen=${passlen}'
-      - 'curlbackoff=${curlbackoff}'
-      - 'curlreauth=${curlreauth}'
+      - vaultaddr=${vaultaddr}
+      - vaultrole=${role}
+      - kvpath=${kvpath}
+      - passlen=${passlen}
+      - curlbackoff=${curlbackoff}
+      - curlreauth=${curlreauth}
 EOF
 ) 1>&3
 
