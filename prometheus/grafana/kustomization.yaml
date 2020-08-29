@@ -10,3 +10,4 @@ configMapGenerator:
       - datasources.yaml
 resources:
   - service.yaml
+  - ingressroute.yaml
