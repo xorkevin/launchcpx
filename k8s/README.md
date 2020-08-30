@@ -17,6 +17,7 @@
 - `minikube start`
 - `minikube status`
 - `minikube dashboard`
+- `minikube addons enable metrics-server`
 - `minikube stop`
 - `minikube delete`
 
