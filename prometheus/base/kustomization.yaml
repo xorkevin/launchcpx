@@ -4,7 +4,7 @@ namespace: prometheus-system
 configMapGenerator:
   - name: config
     files:
-      - prometheus.yml
+      - prometheus.yaml
 resources:
   - namespace.yaml
   - rbac.yaml

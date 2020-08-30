@@ -47,7 +47,7 @@ spec:
           image: prom/prometheus:v2.20.1
           command: ['/bin/prometheus']
           args:
-            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--config.file=/etc/prometheus/prometheus.yaml'
             - '--storage.tsdb.path=/var/lib/prometheus/data'
             - '--storage.tsdb.retention.time=15d'
             - '--web.console.libraries=/usr/share/prometheus/console_libraries'
