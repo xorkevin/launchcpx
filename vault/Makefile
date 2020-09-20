@@ -33,6 +33,9 @@ devinit:
 devup:
 	helm install $(HELM_ARGS) -f values.yaml vault ./helmchart
 
+devup2:
+	kubectl apply -k ./base
+
 devupdate:
 	helm upgrade $(HELM_ARGS) -f values.yaml vault ./helmchart
 
