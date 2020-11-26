@@ -20,9 +20,9 @@ KUBE_HOST=kubernetes.default.svc.cluster.local
 VAULTPOD=vault-0
 KUBEEXEC=$(KUBECTL) exec -it $(VAULTPOD) --
 KUBEVAULT=$(KUBEEXEC) vault
-VAULT=VAULT_ADDR=http://127.0.0.1:8200/ vault
+VAULT=VAULT_ADDR=http://vault.dev.home:8080/ vault
 
-.PHONY: devinit devup devupdate devdown devforward devclean
+.PHONY: devinit devup devupdate devdown devclean
 
 devinit:
 	if [ ! -e $(HELMCHART_DIR) ]; then \
@@ -42,9 +42,6 @@ devupdate:
 devdown:
 	helm uninstall $(HELM_ARGS) vault
 
-devforward:
-	$(KUBECTL) port-forward svc/vault 8200:8200 >/dev/null 2>&1
-
 devclean:
 	rm -rf $(KEYDIR)
 
@@ -60,7 +57,7 @@ unseal:
 	@$(KUBEVAULT) operator unseal $(UNSEAL_KEY)
 
 seal:
-	@$(VAULT) operator seal
+	@$(KUBEVAULT) operator seal
 
 roottoken:
 	@echo $(ROOT_TOKEN)
