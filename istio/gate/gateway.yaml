@@ -11,4 +11,4 @@ spec:
         number: 80
         protocol: HTTP
       hosts:
-        - '*.dev.home'
+        - '*.dev.localhost'

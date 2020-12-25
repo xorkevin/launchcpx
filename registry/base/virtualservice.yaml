@@ -6,7 +6,7 @@ spec:
   gateways:
     - istio-system/istio-gateway
   hosts:
-    - docker.pkg.dev.home
+    - docker.pkg.dev.localhost
   http:
     - route:
         - destination:

@@ -7,7 +7,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`grafana.dev.home`)
+      match: Host(`grafana.dev.localhost`)
       services:
         - kind: Service
           scheme: http

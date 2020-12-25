@@ -7,7 +7,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`docker.pkg.dev.home`)
+      match: Host(`docker.pkg.dev.localhost`)
       services:
         - kind: Service
           scheme: http

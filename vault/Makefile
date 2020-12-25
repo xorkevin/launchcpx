@@ -20,7 +20,7 @@ KUBE_HOST=kubernetes.default.svc.cluster.local
 VAULTPOD=vault-0
 KUBEEXEC=$(KUBECTL) exec -it $(VAULTPOD) --
 KUBEVAULT=$(KUBEEXEC) vault
-VAULT=VAULT_ADDR=http://vault.dev.home:8080/ vault
+VAULT=VAULT_ADDR=http://vault.dev.localhost:8080/ vault
 
 .PHONY: devinit devup devupdate devdown devclean
 
