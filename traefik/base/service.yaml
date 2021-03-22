@@ -19,7 +19,7 @@ spec:
         app: traefik
         app.kubernetes.io/name: traefik-controller
         app.kubernetes.io/instance: traefik-controller
-        app.kubernetes.io/version: v2.2
+        app.kubernetes.io/version: v2.4
         app.kubernetes.io/component: ingress-controller
         app.kubernetes.io/part-of: traefik
         app.kubernetes.io/managed-by: launchcpx
@@ -31,7 +31,7 @@ spec:
       serviceAccountName: traefik-ingress-controller
       containers:
         - name: traefik
-          image: traefik:v2.3
+          image: traefik:v2.4
           args:
             - '--entrypoints.web.address=:80'
             - '--entrypoints.tcpep.address=:8000'
