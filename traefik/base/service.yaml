@@ -71,6 +71,7 @@ spec:
       port: 8000
       name: tcpep
       targetPort: 8000
+  externalTrafficPolicy: Local
 
 ---
 apiVersion: v1
