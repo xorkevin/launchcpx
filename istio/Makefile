@@ -32,4 +32,4 @@ ports:
 SRC_PORT=8080
 
 devforward:
-	interchange fwd -p $(SRC_PORT) -t $(INGRESS_HOST):$(INGRESS_PORT)
+	interchange fwd -t $(SRC_PORT):$(INGRESS_HOST):$(INGRESS_PORT)
